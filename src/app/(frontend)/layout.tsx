@@ -1,13 +1,15 @@
-import type { Metadata } from 'next'
+import React from 'react'
 import { Toaster } from 'sonner'
-import './globals.css'
+import './styles.css'
 
-export const metadata: Metadata = {
+export const metadata = {
   title: 'SouthEastSocial — Events for SE London',
   description: 'Discover community events, gigs, markets, and more across South East London.',
 }
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout(props: { children: React.ReactNode }) {
+  const { children } = props
+
   return (
     <html lang="en">
       <body>
