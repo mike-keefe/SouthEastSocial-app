@@ -8,6 +8,12 @@ import sharp from 'sharp'
 
 import { Users } from './collections/Users'
 import { Media } from './collections/Media'
+import { Categories } from './collections/Categories'
+import { Venues } from './collections/Venues'
+import { Organisers } from './collections/Organisers'
+import { Events } from './collections/Events'
+import { Follows } from './collections/Follows'
+import { EmailSubscriptions } from './collections/EmailSubscriptions'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -22,7 +28,7 @@ export default buildConfig({
       titleSuffix: '— SouthEastSocial Admin',
     },
   },
-  collections: [Users, Media],
+  collections: [Users, Media, Categories, Venues, Organisers, Events, Follows, EmailSubscriptions],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',
   typescript: {
