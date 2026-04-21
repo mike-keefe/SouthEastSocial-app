@@ -7,7 +7,10 @@ import { WeeklyDigestEmail, type DigestEvent } from '@/lib/email/templates/Weekl
 
 export async function POST(req: Request) {
   const authHeader = req.headers.get('authorization')
-  const token = authHeader?.replace('Bearer ', '')
+  if (!authHeader?.startsWith('Bearer ')) {
+    return NextResponse.json({ error: 'Unauthorized', code: 'INVALID_TOKEN' }, { status: 401 })
+  }
+  const token = authHeader.slice(7)
 
   if (!token || token !== process.env.DIGEST_SECRET) {
     return NextResponse.json({ error: 'Unauthorized', code: 'INVALID_TOKEN' }, { status: 401 })

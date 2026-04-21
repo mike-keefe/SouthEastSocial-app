@@ -6,10 +6,22 @@ import { EventCard } from '@/components/EventCard'
 import type { Event } from '@/payload-types'
 import type { Metadata } from 'next'
 
+const siteUrl = process.env.NEXT_PUBLIC_SERVER_URL || 'https://southeastsocial.com'
+
 export const metadata: Metadata = {
   title: 'SouthEastSocial — Events for SE London',
   description: 'Discover community events, gigs, markets, and more across South East London.',
+  openGraph: {
+    title: 'SouthEastSocial — Events for SE London',
+    description: 'Discover community events, gigs, markets, and more across South East London.',
+    url: siteUrl,
+    siteName: 'SouthEastSocial',
+    type: 'website',
+  },
+  twitter: { card: 'summary_large_image' },
 }
+
+export const revalidate = 300
 
 async function getFeaturedEvents(): Promise<Event[]> {
   const payload = await getPayload({ config: configPromise })
@@ -28,72 +40,160 @@ async function getFeaturedEvents(): Promise<Event[]> {
   return docs as Event[]
 }
 
+const NEIGHBOURHOODS: { label: string; postcode: string }[] = [
+  { label: 'Peckham', postcode: 'SE15' },
+  { label: 'Deptford', postcode: 'SE8' },
+  { label: 'New Cross', postcode: 'SE14' },
+  { label: 'Bermondsey', postcode: 'SE1' },
+  { label: 'Camberwell', postcode: 'SE5' },
+  { label: 'Lewisham', postcode: 'SE13' },
+]
+
 export default async function HomePage() {
   const events = await getFeaturedEvents()
 
   return (
     <>
       {/* Hero */}
-      <section className="bg-neutral-950 text-white py-20 sm:py-28">
+      <section className="relative bg-neutral-950 text-white overflow-hidden">
+        {/* Dot-grid background */}
+        <div
+          className="absolute inset-0 pointer-events-none"
+          aria-hidden="true"
+          style={{
+            backgroundImage:
+              'radial-gradient(circle, rgba(255,255,255,0.055) 1px, transparent 1px)',
+            backgroundSize: '28px 28px',
+          }}
+        />
+        {/* Vignette — fades dot grid toward edges */}
+        <div
+          className="absolute inset-0 pointer-events-none"
+          aria-hidden="true"
+          style={{
+            background:
+              'radial-gradient(ellipse 100% 80% at 50% 50%, transparent 30%, #09090b 100%)',
+          }}
+        />
+
         <PageWrapper>
-          <div className="max-w-2xl">
-            <h1 className="font-display text-5xl sm:text-6xl font-bold leading-tight mb-6">
-              What&apos;s on in{' '}
-              <span className="text-primary-400">SE London</span>
-            </h1>
-            <p className="text-neutral-300 text-lg sm:text-xl mb-10 leading-relaxed">
-              Gigs, markets, community events, and culture — all in one place.
-              Find what&apos;s happening near you this week.
+          <div className="relative py-16 sm:py-24 lg:py-28">
+            {/* Eyebrow */}
+            <p className="font-display text-[10px] font-medium tracking-[0.35em] uppercase text-neutral-600 mb-10">
+              SE London&nbsp; //&nbsp; Community Events
             </p>
 
-            <form action="/events" method="GET" className="flex flex-col sm:flex-row gap-3">
-              <input
-                name="q"
-                type="text"
-                placeholder="Search events…"
-                aria-label="Search events by keyword"
-                className="flex-1 h-12 px-4 rounded-xl bg-white/10 border border-white/20 text-white placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-primary-400 text-sm"
-              />
-              <input
-                name="postcode"
-                type="text"
-                placeholder="Postcode (e.g. SE15)"
-                aria-label="Filter by postcode"
-                className="w-full sm:w-36 h-12 px-4 rounded-xl bg-white/10 border border-white/20 text-white placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-primary-400 text-sm"
-              />
-              <button
-                type="submit"
-                className="h-12 px-6 bg-primary-500 hover:bg-primary-600 text-white font-semibold rounded-xl transition-colors focus:outline-none focus:ring-2 focus:ring-primary-400 focus:ring-offset-2 focus:ring-offset-neutral-950"
+            {/* Stacked headline in Geist Mono */}
+            <h1
+              className="font-display font-bold leading-[0.87] mb-10"
+              aria-label="What's on in SE London"
+            >
+              <span
+                className="block text-white"
+                style={{ fontSize: 'clamp(3.2rem, 9.5vw, 7rem)' }}
               >
-                Search
-              </button>
+                What&apos;s
+              </span>
+              <span
+                className="block text-primary-400"
+                style={{ fontSize: 'clamp(3.2rem, 9.5vw, 7rem)' }}
+              >
+                on —
+              </span>
+              <span
+                className="block text-neutral-600"
+                style={{ fontSize: 'clamp(1.9rem, 5.5vw, 4.2rem)' }}
+              >
+                SE London.
+              </span>
+            </h1>
+
+            {/* Divider + tagline */}
+            <div className="flex items-center gap-4 mb-8">
+              <div className="h-px w-8 bg-primary-500 shrink-0" />
+              <p className="text-neutral-400 text-sm">
+                Gigs, markets, community nights, and culture — from Peckham to Bermondsey.
+              </p>
+            </div>
+
+            {/* Search form */}
+            <form action="/events" method="GET" className="max-w-xl mb-6">
+              <div className="flex flex-col sm:flex-row gap-2">
+                <input
+                  name="q"
+                  type="text"
+                  placeholder="Search events, venues…"
+                  aria-label="Search events by keyword"
+                  className="flex-1 h-11 px-4 bg-neutral-900 border border-neutral-700 rounded text-white placeholder:text-neutral-600 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                />
+                <input
+                  name="postcode"
+                  type="text"
+                  placeholder="SE postcode"
+                  aria-label="Filter by SE postcode"
+                  className="w-full sm:w-32 h-11 px-4 bg-neutral-900 border border-neutral-700 rounded text-white placeholder:text-neutral-600 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all uppercase"
+                />
+                <button
+                  type="submit"
+                  className="h-11 px-6 bg-primary-600 hover:bg-primary-500 text-white font-bold text-sm rounded transition-colors whitespace-nowrap focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 focus:ring-offset-neutral-950"
+                >
+                  Search
+                </button>
+              </div>
             </form>
+
+            {/* Neighbourhood chips */}
+            <div className="flex items-center flex-wrap gap-2">
+              <span className="text-neutral-700 text-[10px] uppercase tracking-[0.22em] font-bold mr-1">
+                Browse
+              </span>
+              {NEIGHBOURHOODS.map(({ label, postcode }) => (
+                <Link
+                  key={label}
+                  href={`/events?postcode=${encodeURIComponent(postcode)}`}
+                  className="text-xs text-neutral-500 hover:text-white border border-neutral-800 hover:border-neutral-600 px-2.5 py-1 rounded transition-all hover:bg-neutral-900"
+                >
+                  {label}
+                </Link>
+              ))}
+            </div>
           </div>
         </PageWrapper>
       </section>
 
       {/* Featured events */}
-      <section className="py-16">
+      <section className="py-14 sm:py-16 bg-neutral-50 dark:bg-neutral-950 border-t border-neutral-100 dark:border-neutral-800">
         <PageWrapper>
-          <div className="flex items-center justify-between mb-8">
-            <h2 className="font-display text-3xl font-bold text-neutral-950">Upcoming events</h2>
+          <div className="flex items-end justify-between mb-8">
+            <div>
+              <p className="font-display text-[10px] uppercase tracking-widest text-neutral-400 dark:text-neutral-600 mb-2">
+                Coming up
+              </p>
+              <h2 className="font-display text-2xl sm:text-3xl font-bold text-neutral-950 dark:text-white">
+                Upcoming events
+              </h2>
+            </div>
             <Link
               href="/events"
-              className="text-sm font-medium text-primary-600 hover:text-primary-700 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 rounded"
+              className="text-sm font-medium text-neutral-500 hover:text-neutral-950 dark:hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 rounded-sm"
             >
               See all →
             </Link>
           </div>
 
           {events.length === 0 ? (
-            <div className="text-center py-16 text-neutral-500">
-              <p className="text-lg">No upcoming events yet — check back soon.</p>
-              <Link href="/submit" className="mt-4 inline-block text-primary-600 font-medium hover:underline">
-                Got an event? Submit it →
+            <div className="text-center py-20 border-2 border-dashed border-neutral-200 dark:border-neutral-800 rounded text-neutral-400">
+              <p className="text-base mb-3 font-medium">No upcoming events yet</p>
+              <p className="text-sm mb-6">Be the first to list something.</p>
+              <Link
+                href="/submit"
+                className="inline-block bg-primary-600 hover:bg-primary-500 text-white font-semibold px-5 py-2.5 rounded transition-colors text-sm"
+              >
+                Submit an event →
               </Link>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {events.map((event) => (
                 <EventCard key={event.id} event={event} />
               ))}
@@ -103,16 +203,23 @@ export default async function HomePage() {
       </section>
 
       {/* CTA strip */}
-      <section className="bg-primary-50 border-t border-primary-100 py-12">
+      <section className="bg-neutral-950 text-white border-t border-neutral-800/60 py-14 sm:py-16">
         <PageWrapper>
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
             <div>
-              <h2 className="font-display text-2xl font-bold text-neutral-950 mb-1">Running an event in SE London?</h2>
-              <p className="text-neutral-600">Get it in front of thousands of local people — for free.</p>
+              <p className="font-display text-[10px] uppercase tracking-widest text-primary-500 mb-3">
+                List your event
+              </p>
+              <h2 className="font-display text-xl sm:text-2xl font-bold mb-2">
+                Running something in SE London?
+              </h2>
+              <p className="text-neutral-400 text-sm">
+                Get it in front of your community — free, always.
+              </p>
             </div>
             <Link
               href="/submit"
-              className="shrink-0 bg-primary-500 hover:bg-primary-600 text-white font-semibold px-6 py-3 rounded-xl transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
+              className="shrink-0 bg-primary-600 hover:bg-primary-500 text-white font-bold px-6 py-3 rounded transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 focus:ring-offset-neutral-950 text-sm whitespace-nowrap"
             >
               Submit your event
             </Link>

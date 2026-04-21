@@ -21,17 +21,20 @@ export function EventFilters({ categories }: Props) {
       } else {
         params.delete(key)
       }
-      params.delete('page') // reset pagination on filter change
+      params.delete('page')
       router.push(`${pathname}?${params.toString()}`)
     },
     [searchParams, pathname, router],
   )
 
+  const inputCls =
+    'h-9 px-3 rounded border border-neutral-200 dark:border-neutral-700 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white dark:bg-neutral-900 text-neutral-950 dark:text-neutral-50 placeholder:text-neutral-400'
+  const labelCls = 'text-[10px] font-bold uppercase tracking-widest text-neutral-500 mb-1 block'
+
   return (
-    <div className="bg-white rounded-xl border border-neutral-200 p-4 flex flex-wrap gap-3 items-end">
-      {/* Keyword search */}
+    <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded p-4 flex flex-wrap gap-4 items-end">
       <div className="flex flex-col gap-1 min-w-[160px] flex-1">
-        <label htmlFor="filter-q" className="text-xs font-semibold text-neutral-500 uppercase tracking-wide">
+        <label htmlFor="filter-q" className={labelCls}>
           Search
         </label>
         <input
@@ -40,20 +43,19 @@ export function EventFilters({ categories }: Props) {
           placeholder="Event name or keyword"
           defaultValue={searchParams.get('q') ?? ''}
           onChange={(e) => updateParam('q', e.target.value)}
-          className="h-9 px-3 rounded-lg border border-neutral-300 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white"
+          className={inputCls}
         />
       </div>
 
-      {/* Category */}
       <div className="flex flex-col gap-1">
-        <label htmlFor="filter-category" className="text-xs font-semibold text-neutral-500 uppercase tracking-wide">
+        <label htmlFor="filter-category" className={labelCls}>
           Category
         </label>
         <select
           id="filter-category"
           defaultValue={searchParams.get('category') ?? ''}
           onChange={(e) => updateParam('category', e.target.value)}
-          className="h-9 px-3 rounded-lg border border-neutral-300 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white"
+          className={inputCls}
         >
           <option value="">All categories</option>
           {categories.map((cat) => (
@@ -64,9 +66,8 @@ export function EventFilters({ categories }: Props) {
         </select>
       </div>
 
-      {/* Postcode */}
       <div className="flex flex-col gap-1">
-        <label htmlFor="filter-postcode" className="text-xs font-semibold text-neutral-500 uppercase tracking-wide">
+        <label htmlFor="filter-postcode" className={labelCls}>
           Postcode
         </label>
         <input
@@ -75,11 +76,10 @@ export function EventFilters({ categories }: Props) {
           placeholder="e.g. SE15"
           defaultValue={searchParams.get('postcode') ?? ''}
           onChange={(e) => updateParam('postcode', e.target.value)}
-          className="h-9 px-3 w-28 rounded-lg border border-neutral-300 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white"
+          className={`${inputCls} w-28`}
         />
       </div>
 
-      {/* Free only */}
       <label className="flex items-center gap-2 text-sm cursor-pointer self-end h-9">
         <input
           type="checkbox"
@@ -87,16 +87,18 @@ export function EventFilters({ categories }: Props) {
           onChange={(e) => updateParam('free', e.target.checked ? 'true' : '')}
           className="w-4 h-4 accent-primary-500"
         />
-        <span className="text-neutral-700 font-medium">Free only</span>
+        <span className="text-neutral-700 dark:text-neutral-300 font-medium">Free only</span>
       </label>
 
-      {/* Clear */}
-      {(searchParams.get('q') || searchParams.get('category') || searchParams.get('postcode') || searchParams.get('free')) && (
+      {(searchParams.get('q') ||
+        searchParams.get('category') ||
+        searchParams.get('postcode') ||
+        searchParams.get('free')) && (
         <button
           onClick={() => router.push(pathname)}
-          className="h-9 px-3 text-sm text-neutral-500 hover:text-neutral-800 underline self-end"
+          className="h-9 px-3 text-sm text-neutral-500 hover:text-neutral-950 dark:hover:text-white underline self-end transition-colors"
         >
-          Clear filters
+          Clear
         </button>
       )}
     </div>
