@@ -1,5 +1,8 @@
 import type { CollectionConfig } from 'payload'
 import { admins, adminsOrSelf } from '../lib/access'
+import { resend, FROM_EMAIL } from '../lib/email/resend'
+import { WelcomeEmail } from '../lib/email/templates/WelcomeEmail'
+import { render } from '@react-email/render'
 
 export const Users: CollectionConfig = {
   slug: 'users',
@@ -64,6 +67,18 @@ export const Users: CollectionConfig = {
           })
         } catch (err) {
           console.error('[Users] Failed to create EmailSubscriptions record:', err)
+        }
+
+        try {
+          const html = await render(WelcomeEmail({ displayName: doc.displayName }))
+          await resend.emails.send({
+            from: FROM_EMAIL,
+            to: doc.email,
+            subject: 'Welcome to SouthEastSocial',
+            html,
+          })
+        } catch (err) {
+          console.error('[Users] Failed to send WelcomeEmail:', err)
         }
 
         return doc
