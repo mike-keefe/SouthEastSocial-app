@@ -11,14 +11,12 @@ type Props = {
 export function MobileNav({ isLoggedIn }: Props) {
   const [open, setOpen] = useState(false)
 
-  // Close on route change / escape
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => e.key === 'Escape' && setOpen(false)
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
   }, [])
 
-  // Lock body scroll when open
   useEffect(() => {
     document.body.style.overflow = open ? 'hidden' : ''
     return () => { document.body.style.overflow = '' }
@@ -30,30 +28,28 @@ export function MobileNav({ isLoggedIn }: Props) {
         onClick={() => setOpen(!open)}
         aria-label={open ? 'Close menu' : 'Open menu'}
         aria-expanded={open}
-        className="sm:hidden p-2 -mr-2 rounded-lg text-neutral-600 hover:text-neutral-950 hover:bg-neutral-100 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500"
+        className="sm:hidden p-2 -mr-1 rounded text-neutral-400 hover:text-white hover:bg-neutral-800 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500"
       >
-        {open ? <X size={22} /> : <Menu size={22} />}
+        {open ? <X size={20} /> : <Menu size={20} />}
       </button>
 
-      {/* Drawer overlay */}
       {open && (
         <div
           className="fixed inset-0 z-40 sm:hidden"
           onClick={() => setOpen(false)}
           aria-hidden="true"
         >
-          <div className="absolute inset-0 bg-neutral-950/60 backdrop-blur-sm" />
+          <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
         </div>
       )}
 
-      {/* Drawer panel */}
       <nav
         aria-label="Mobile navigation"
-        className={`fixed top-16 right-0 bottom-0 z-50 w-72 bg-white shadow-2xl flex flex-col transition-transform duration-200 sm:hidden ${
+        className={`fixed top-14 right-0 bottom-0 z-50 w-64 bg-neutral-950 border-l border-neutral-800 flex flex-col transition-transform duration-200 sm:hidden ${
           open ? 'translate-x-0' : 'translate-x-full'
         }`}
       >
-        <div className="flex-1 overflow-y-auto px-6 py-8 space-y-1">
+        <div className="flex-1 overflow-y-auto px-4 py-6 space-y-0.5">
           {[
             { href: '/events', label: 'Events' },
             { href: '/venues', label: 'Venues' },
@@ -63,19 +59,19 @@ export function MobileNav({ isLoggedIn }: Props) {
               key={href}
               href={href}
               onClick={() => setOpen(false)}
-              className="block px-3 py-3 text-base font-medium text-neutral-700 hover:text-neutral-950 hover:bg-neutral-50 rounded-lg transition-colors"
+              className="block px-3 py-2.5 text-sm font-medium text-neutral-400 hover:text-white hover:bg-neutral-800 rounded transition-colors"
             >
               {label}
             </Link>
           ))}
         </div>
 
-        <div className="border-t border-neutral-100 px-6 py-6 space-y-3">
+        <div className="border-t border-neutral-800 px-4 py-5 space-y-2">
           {isLoggedIn ? (
             <Link
               href="/account"
               onClick={() => setOpen(false)}
-              className="block w-full text-center bg-neutral-950 text-white font-semibold px-4 py-3 rounded-xl transition-colors hover:bg-neutral-800"
+              className="block w-full text-center bg-primary-600 hover:bg-primary-500 text-white font-semibold px-4 py-2.5 rounded transition-colors text-sm"
             >
               My account
             </Link>
@@ -84,14 +80,14 @@ export function MobileNav({ isLoggedIn }: Props) {
               <Link
                 href="/login"
                 onClick={() => setOpen(false)}
-                className="block w-full text-center border border-neutral-200 text-neutral-700 font-semibold px-4 py-3 rounded-xl transition-colors hover:border-neutral-400"
+                className="block w-full text-center border border-neutral-700 text-neutral-300 font-medium px-4 py-2.5 rounded transition-colors hover:border-neutral-500 hover:text-white text-sm"
               >
                 Log in
               </Link>
               <Link
                 href="/signup"
                 onClick={() => setOpen(false)}
-                className="block w-full text-center bg-primary-500 text-white font-semibold px-4 py-3 rounded-xl transition-colors hover:bg-primary-600"
+                className="block w-full text-center bg-primary-600 hover:bg-primary-500 text-white font-semibold px-4 py-2.5 rounded transition-colors text-sm"
               >
                 Sign up free
               </Link>

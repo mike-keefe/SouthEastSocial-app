@@ -11,7 +11,7 @@ import type { Where } from 'payload'
 
 export const metadata: Metadata = {
   title: 'Events — SouthEastSocial',
-  description: 'Browse all upcoming events in South East London. Filter by category, postcode, date, or price.',
+  description: 'Browse all upcoming events in South East London.',
 }
 
 type SearchParams = {
@@ -34,10 +34,11 @@ async function getEvents(params: SearchParams) {
 
   if (params.q) conditions.push({ title: { contains: params.q } })
   if (params.category) conditions.push({ 'category.slug': { equals: params.category } })
-  if (params.postcode) conditions.push({ postcode: { contains: params.postcode.toUpperCase() } })
+  if (params.postcode)
+    conditions.push({ postcode: { contains: params.postcode.toUpperCase() } })
   if (params.free === 'true') conditions.push({ price: { contains: 'Free' } })
 
-  const result = await payload.find({
+  return payload.find({
     collection: 'events',
     where: { and: conditions },
     sort: 'startDate',
@@ -45,8 +46,6 @@ async function getEvents(params: SearchParams) {
     page: Number(params.page) || 1,
     depth: 2,
   })
-
-  return result
 }
 
 async function getCategories(): Promise<Category[]> {
@@ -55,9 +54,7 @@ async function getCategories(): Promise<Category[]> {
   return docs as Category[]
 }
 
-type Props = {
-  searchParams: Promise<SearchParams>
-}
+type Props = { searchParams: Promise<SearchParams> }
 
 export default async function EventsPage({ searchParams }: Props) {
   const params = await searchParams
@@ -67,27 +64,61 @@ export default async function EventsPage({ searchParams }: Props) {
   ])
 
   const currentPage = Number(page) || 1
+  const hasFilters = !!(params.q || params.category || params.postcode || params.free)
 
   return (
-    <div className="py-10">
-      <PageWrapper>
-        <h1 className="font-display text-4xl font-bold text-neutral-950 mb-6">Events</h1>
-
-        <Suspense>
-          <EventFilters categories={categories} />
-        </Suspense>
-
-        <div className="mt-8">
-          {(events as Event[]).length === 0 ? (
-            <div className="text-center py-20 text-neutral-500">
-              <p className="text-lg mb-2">No events match your filters.</p>
-              <Link href="/events" className="text-primary-600 hover:underline font-medium">
-                Clear filters
+    <>
+      {/* Page header */}
+      <section className="bg-neutral-950 text-white border-b border-neutral-800/60 py-12 sm:py-16">
+        <PageWrapper>
+          <p className="font-display text-[10px] uppercase tracking-[0.3em] text-neutral-600 mb-4">
+            SE London
+          </p>
+          <h1 className="font-display font-bold text-3xl sm:text-4xl text-white">
+            What&apos;s on
+          </h1>
+          {hasFilters && (
+            <div className="mt-3 flex items-center gap-2">
+              <span className="text-neutral-500 text-sm">Filtered results</span>
+              <Link
+                href="/events"
+                className="text-xs text-primary-400 hover:text-primary-300 underline underline-offset-2"
+              >
+                Clear all
               </Link>
+            </div>
+          )}
+        </PageWrapper>
+      </section>
+
+      <div className="bg-neutral-50 dark:bg-neutral-950 min-h-screen">
+        <PageWrapper>
+          {/* Filters */}
+          <div className="pt-6 pb-5">
+            <Suspense>
+              <EventFilters categories={categories} />
+            </Suspense>
+          </div>
+
+          {/* Results */}
+          {(events as Event[]).length === 0 ? (
+            <div className="text-center py-24 border-2 border-dashed border-neutral-200 dark:border-neutral-800 rounded">
+              <p className="text-neutral-500 text-base font-medium mb-2">No events found</p>
+              <p className="text-neutral-400 text-sm mb-6">
+                {hasFilters ? 'Try adjusting your filters.' : 'Check back soon.'}
+              </p>
+              {hasFilters && (
+                <Link
+                  href="/events"
+                  className="inline-block bg-neutral-950 dark:bg-white text-white dark:text-neutral-950 font-semibold px-5 py-2.5 rounded text-sm hover:opacity-90 transition-opacity"
+                >
+                  Clear filters
+                </Link>
+              )}
             </div>
           ) : (
             <>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 pb-16">
                 {(events as Event[]).map((event) => (
                   <EventCard key={event.id} event={event} />
                 ))}
@@ -95,7 +126,7 @@ export default async function EventsPage({ searchParams }: Props) {
 
               {/* Pagination */}
               {totalPages > 1 && (
-                <div className="flex justify-center gap-2 mt-10">
+                <div className="flex justify-center gap-1.5 pb-16">
                   {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => {
                     const ps = new URLSearchParams()
                     if (params.q) ps.set('q', params.q)
@@ -108,10 +139,10 @@ export default async function EventsPage({ searchParams }: Props) {
                       <Link
                         key={p}
                         href={`/events?${ps.toString()}`}
-                        className={`w-10 h-10 flex items-center justify-center rounded-lg text-sm font-medium transition-colors ${
+                        className={`w-9 h-9 flex items-center justify-center rounded text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 ${
                           p === currentPage
-                            ? 'bg-primary-500 text-white'
-                            : 'bg-white text-neutral-700 border border-neutral-200 hover:border-primary-300'
+                            ? 'bg-neutral-950 dark:bg-white text-white dark:text-neutral-950'
+                            : 'bg-white dark:bg-neutral-900 text-neutral-600 dark:text-neutral-400 border border-neutral-200 dark:border-neutral-700 hover:border-neutral-400 dark:hover:border-neutral-500'
                         }`}
                         aria-current={p === currentPage ? 'page' : undefined}
                       >
@@ -123,8 +154,8 @@ export default async function EventsPage({ searchParams }: Props) {
               )}
             </>
           )}
-        </div>
-      </PageWrapper>
-    </div>
+        </PageWrapper>
+      </div>
+    </>
   )
 }

@@ -25,12 +25,11 @@ export default async function SubmitPage() {
   ])
 
   return (
-    <div className="py-10">
+    <div className="bg-neutral-50 dark:bg-neutral-950 min-h-screen py-10">
       <PageWrapper narrow>
-        <h1 className="font-display text-4xl font-bold text-neutral-950 mb-2">Submit an event</h1>
-        <p className="text-neutral-500 mb-8">
-          All submissions are reviewed before going live. You&apos;ll receive an email when your event is approved.
-        </p>
+        <h1 className="font-display font-bold text-2xl sm:text-3xl text-neutral-950 dark:text-white mb-8 tracking-tight">
+          Submit an event
+        </h1>
         <SubmitEventForm categories={categories as Category[]} venues={venues as Venue[]} />
       </PageWrapper>
     </div>
