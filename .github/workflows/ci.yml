@@ -54,3 +54,4 @@ jobs:
         env:
           PAYLOAD_SECRET: test-secret-for-ci
           DATABASE_URL: postgresql://placeholder/test
+          RESEND_API_KEY: re_placeholder_for_ci
