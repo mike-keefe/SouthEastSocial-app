@@ -8,7 +8,15 @@
       "Bash(pnpm install *)",
       "Bash(pnpm dlx *)",
       "Bash(git add *)",
-      "Bash(git commit --no-verify -m 'chore: initial project scaffold *)"
+      "Bash(git commit --no-verify -m 'chore: initial project scaffold *)",
+      "Bash(gh repo *)",
+      "Bash(git remote *)",
+      "Bash(git push *)",
+      "Bash(gh auth *)",
+      "Bash(gh api *)",
+      "Bash(git commit -m 'chore: complete phase 1 setup and config *)",
+      "Bash(gh pr *)",
+      "Bash(git commit -m 'chore: rebase onto official create-payload-app scaffold *)"
     ]
   }
 }
