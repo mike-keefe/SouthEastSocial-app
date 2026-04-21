@@ -4,18 +4,25 @@ import { vercelBlobStorage } from '@payloadcms/storage-vercel-blob'
 import path from 'path'
 import { buildConfig } from 'payload'
 import { fileURLToPath } from 'url'
+import sharp from 'sharp'
+
+import { Users } from './collections/Users'
+import { Media } from './collections/Media'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 export default buildConfig({
   admin: {
-    user: 'users',
+    user: Users.slug,
+    importMap: {
+      baseDir: path.resolve(dirname),
+    },
     meta: {
       titleSuffix: '— SouthEastSocial Admin',
     },
   },
-  collections: [],
+  collections: [Users, Media],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',
   typescript: {
@@ -23,9 +30,10 @@ export default buildConfig({
   },
   db: postgresAdapter({
     pool: {
-      connectionString: process.env.DATABASE_URI || '',
+      connectionString: process.env.DATABASE_URL || '',
     },
   }),
+  sharp,
   plugins: [
     vercelBlobStorage({
       enabled: !!process.env.BLOB_READ_WRITE_TOKEN,
@@ -35,9 +43,4 @@ export default buildConfig({
       token: process.env.BLOB_READ_WRITE_TOKEN || '',
     }),
   ],
-  upload: {
-    limits: {
-      fileSize: 5_000_000,
-    },
-  },
 })
