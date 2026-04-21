@@ -1,6 +1,10 @@
 import type { CollectionConfig } from 'payload'
 import { admins, authenticated, publishedOrAdmin } from '../lib/access'
 import { slugify } from '../lib/slugify'
+import { resend, FROM_EMAIL } from '../lib/email/resend'
+import { EventSubmittedEmail } from '../lib/email/templates/EventSubmittedEmail'
+import { EventApprovedEmail } from '../lib/email/templates/EventApprovedEmail'
+import { render } from '@react-email/render'
 
 const SE_POSTCODE_REGEX = /^SE\d/i
 
@@ -159,21 +163,62 @@ export const Events: CollectionConfig = {
     ],
     afterChange: [
       async ({ doc, previousDoc, operation, req }) => {
-        // Trigger EventApprovedEmail when an admin publishes an event
+        // Resolve the submitter's email and display name for both email types
+        const getSubmitter = async () => {
+          if (!doc.submittedBy) return null
+          const userId = typeof doc.submittedBy === 'object' ? doc.submittedBy.id : doc.submittedBy
+          try {
+            return await req.payload.findByID({ collection: 'users', id: userId, req })
+          } catch {
+            return null
+          }
+        }
+
+        if (operation === 'create') {
+          const submitter = await getSubmitter()
+          if (submitter?.email) {
+            try {
+              const html = await render(
+                EventSubmittedEmail({ eventTitle: doc.title, displayName: submitter.displayName ?? undefined }),
+              )
+              await resend.emails.send({
+                from: FROM_EMAIL,
+                to: submitter.email,
+                subject: `Your event "${doc.title}" has been submitted`,
+                html,
+              })
+            } catch (err) {
+              console.error('[Events] Failed to send EventSubmittedEmail:', err)
+            }
+          }
+        }
+
         const justPublished =
           operation === 'update' &&
           previousDoc?.status !== 'published' &&
           doc.status === 'published'
 
         if (justPublished) {
-          // Email sending wired up in Phase 4.
-          // Placeholder: log so we can verify the hook fires correctly.
-          req.payload.logger.info(`[Events] Event published: ${doc.id} — approval email queued`)
-        }
-
-        // Trigger EventSubmittedEmail on creation
-        if (operation === 'create') {
-          req.payload.logger.info(`[Events] Event created: ${doc.id} — submission email queued`)
+          const submitter = await getSubmitter()
+          if (submitter?.email) {
+            try {
+              const html = await render(
+                EventApprovedEmail({
+                  eventTitle: doc.title,
+                  eventSlug: doc.slug ?? '',
+                  displayName: submitter.displayName ?? undefined,
+                }),
+              )
+              await resend.emails.send({
+                from: FROM_EMAIL,
+                to: submitter.email,
+                subject: `Your event "${doc.title}" is now live`,
+                html,
+              })
+            } catch (err) {
+              console.error('[Events] Failed to send EventApprovedEmail:', err)
+            }
+          }
         }
 
         return doc

@@ -1,0 +1,137 @@
+import { getPayload, type Where } from 'payload'
+import config from '@payload-config'
+import { render } from '@react-email/render'
+import { NextResponse } from 'next/server'
+import { resend, FROM_EMAIL } from '@/lib/email/resend'
+import { WeeklyDigestEmail, type DigestEvent } from '@/lib/email/templates/WeeklyDigestEmail'
+
+export async function POST(req: Request) {
+  const authHeader = req.headers.get('authorization')
+  const token = authHeader?.replace('Bearer ', '')
+
+  if (!token || token !== process.env.DIGEST_SECRET) {
+    return NextResponse.json({ error: 'Unauthorized', code: 'INVALID_TOKEN' }, { status: 401 })
+  }
+
+  const payload = await getPayload({ config })
+
+  const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
+  const now = new Date().toISOString()
+
+  // Fetch 4 featured upcoming published events
+  const featuredResult = await payload.find({
+    collection: 'events',
+    where: {
+      and: [{ status: { equals: 'published' } }, { startDate: { greater_than: now } }],
+    },
+    sort: 'startDate',
+    limit: 4,
+    depth: 1,
+  })
+
+  const featuredEvents: DigestEvent[] = featuredResult.docs.map((e) => ({
+    title: e.title,
+    slug: e.slug ?? '',
+    startDate: e.startDate,
+    price: e.price ?? undefined,
+    postcode: e.postcode ?? undefined,
+    venueName: typeof e.venue === 'object' && e.venue ? (e.venue as { name: string }).name : undefined,
+  }))
+
+  // Fetch all users with weeklyDigest opted in
+  const subscriptionsResult = await payload.find({
+    collection: 'email-subscriptions',
+    where: { weeklyDigest: { equals: true } },
+    limit: 1000,
+    depth: 1,
+  })
+
+  let sent = 0
+  let failed = 0
+
+  for (const sub of subscriptionsResult.docs) {
+    const user = typeof sub.user === 'object' ? sub.user : null
+    if (!user || !('email' in user)) continue
+
+    const userId = (user as { id: string | number }).id
+    const userEmail = (user as { email: string }).email
+    const displayName = (user as { displayName?: string }).displayName
+
+    // Fetch this user's follows
+    const followsResult = await payload.find({
+      collection: 'follows',
+      where: { user: { equals: userId } },
+      limit: 100,
+      depth: 1,
+    })
+
+    const hasFollows = followsResult.docs.length > 0
+    let personalisedEvents: DigestEvent[] = []
+
+    if (hasFollows) {
+      const venueIds: (string | number)[] = []
+      const organiserIds: (string | number)[] = []
+
+      for (const follow of followsResult.docs) {
+        if (follow.followType === 'venue' && follow.venue) {
+          const id = typeof follow.venue === 'object' ? follow.venue.id : follow.venue
+          venueIds.push(id)
+        }
+        if (follow.followType === 'organiser' && follow.organiser) {
+          const id = typeof follow.organiser === 'object' ? follow.organiser.id : follow.organiser
+          organiserIds.push(id)
+        }
+      }
+
+      const conditions: Where[] = [
+        { status: { equals: 'published' } },
+        { startDate: { greater_than: sevenDaysAgo } },
+      ]
+
+      const followConditions: Where[] = []
+      if (venueIds.length > 0) followConditions.push({ venue: { in: venueIds } })
+      if (organiserIds.length > 0) followConditions.push({ organiser: { in: organiserIds } })
+
+      if (followConditions.length > 0) {
+        conditions.push({ or: followConditions })
+        const personalisedResult = await payload.find({
+          collection: 'events',
+          where: { and: conditions },
+          sort: 'startDate',
+          limit: 10,
+          depth: 1,
+        })
+
+        personalisedEvents = personalisedResult.docs.map((e) => ({
+          title: e.title,
+          slug: e.slug ?? '',
+          startDate: e.startDate,
+          price: e.price ?? undefined,
+          postcode: e.postcode ?? undefined,
+          venueName:
+            typeof e.venue === 'object' && e.venue
+              ? (e.venue as { name: string }).name
+              : undefined,
+        }))
+      }
+    }
+
+    try {
+      const html = await render(
+        WeeklyDigestEmail({ displayName, featuredEvents, personalisedEvents, hasFollows }),
+      )
+      await resend.emails.send({
+        from: FROM_EMAIL,
+        to: userEmail,
+        subject: 'This week in SE London — your SouthEastSocial digest',
+        html,
+      })
+      sent++
+    } catch (err) {
+      console.error(`[send-digest] Failed to send to ${userEmail}:`, err)
+      failed++
+    }
+  }
+
+  return NextResponse.json({ ok: true, sent, failed })
+}
