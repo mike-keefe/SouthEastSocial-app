@@ -4,27 +4,24 @@ type Props = {
   size?: 'sm' | 'md'
 }
 
-function getTextColour(hex: string): string {
-  const r = parseInt(hex.slice(1, 3), 16)
-  const g = parseInt(hex.slice(3, 5), 16)
-  const b = parseInt(hex.slice(5, 7), 16)
-  // Perceived luminance formula
-  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255
-  return luminance > 0.5 ? '#1a1614' : '#ffffff'
+function getContrastColor(hex: string): string {
+  const clean = hex.startsWith('#') ? hex : '#2563eb'
+  const r = parseInt(clean.slice(1, 3), 16)
+  const g = parseInt(clean.slice(3, 5), 16)
+  const b = parseInt(clean.slice(5, 7), 16)
+  return r * 0.299 + g * 0.587 + b * 0.114 > 150 ? '#09090b' : '#ffffff'
 }
 
 export function CategoryPill({ name, colour, size = 'sm' }: Props) {
-  const bg = colour ?? '#9e8f7e'
-  const text = getTextColour(bg)
-  const cls = size === 'md'
-    ? 'inline-block px-3 py-1 rounded-full text-sm font-medium'
-    : 'inline-block px-2 py-0.5 rounded-full text-xs font-medium'
+  const bg = colour ?? '#2563eb'
+  const text = getContrastColor(bg)
+  const cls =
+    size === 'md'
+      ? 'inline-block px-2.5 py-1 rounded-sm text-xs font-bold uppercase tracking-wider'
+      : 'inline-block px-2 py-0.5 rounded-sm text-[10px] font-bold uppercase tracking-wider'
 
   return (
-    <span
-      className={cls}
-      style={{ backgroundColor: bg, color: text }}
-    >
+    <span className={cls} style={{ backgroundColor: bg, color: text }}>
       {name}
     </span>
   )
