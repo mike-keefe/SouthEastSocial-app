@@ -7,7 +7,24 @@
   --foreground: #1a1614;
 }
 
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-font-smoothing: antialiased;
+}
+
 body {
   background-color: var(--background);
   color: var(--foreground);
+  margin: 0;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
 }

@@ -14,7 +14,9 @@
       "Bash(git push *)",
       "Bash(gh auth *)",
       "Bash(gh api *)",
-      "Bash(git commit -m 'chore: complete phase 1 setup and config *)"
+      "Bash(git commit -m 'chore: complete phase 1 setup and config *)",
+      "Bash(gh pr *)",
+      "Bash(git commit -m 'chore: rebase onto official create-payload-app scaffold *)"
     ]
   }
 }
