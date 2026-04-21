@@ -1,6 +1,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
-import type { Event, Category, Media } from '@/payload-types'
+import { CalendarDays, MapPin } from 'lucide-react'
+import type { Event, Category, Media, Venue } from '@/payload-types'
 import { CategoryPill } from './CategoryPill'
 
 type Props = {
@@ -18,6 +19,8 @@ function formatDate(dateString: string): string {
 export function EventCard({ event }: Props) {
   const category = typeof event.category === 'object' ? (event.category as Category) : null
   const image = typeof event.image === 'object' ? (event.image as Media) : null
+  const venue = typeof event.venue === 'object' ? (event.venue as Venue) : null
+  const location = event.postcode ?? venue?.postcode ?? null
 
   return (
     <Link
@@ -35,7 +38,7 @@ export function EventCard({ event }: Props) {
           />
         ) : (
           <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-neutral-100 to-neutral-200">
-            <span className="text-neutral-400 text-4xl" aria-hidden="true">📅</span>
+            <CalendarDays size={40} className="text-neutral-300" aria-hidden="true" />
           </div>
         )}
       </div>
@@ -53,12 +56,15 @@ export function EventCard({ event }: Props) {
 
         <div className="flex items-center gap-3 text-sm text-neutral-500">
           {event.startDate && (
-            <span>{formatDate(event.startDate)}</span>
-          )}
-          {event.postcode && (
             <span className="flex items-center gap-1">
-              <span aria-hidden="true">📍</span>
-              {event.postcode}
+              <CalendarDays size={13} className="shrink-0" aria-hidden="true" />
+              {formatDate(event.startDate)}
+            </span>
+          )}
+          {location && (
+            <span className="flex items-center gap-1">
+              <MapPin size={13} className="shrink-0" aria-hidden="true" />
+              {location}
             </span>
           )}
         </div>

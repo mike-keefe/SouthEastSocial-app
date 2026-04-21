@@ -4,6 +4,7 @@ import { slugify } from '../lib/slugify'
 import { resend, FROM_EMAIL } from '../lib/email/resend'
 import { EventSubmittedEmail } from '../lib/email/templates/EventSubmittedEmail'
 import { EventApprovedEmail } from '../lib/email/templates/EventApprovedEmail'
+import { EventAdminNotificationEmail } from '../lib/email/templates/EventAdminNotificationEmail'
 import { render } from '@react-email/render'
 
 const SE_POSTCODE_REGEX = /^SE\d/i
@@ -189,6 +190,29 @@ export const Events: CollectionConfig = {
               })
             } catch (err) {
               console.error('[Events] Failed to send EventSubmittedEmail:', err)
+            }
+
+            // Notify admin that a new event needs review
+            const adminEmail = process.env.ADMIN_EMAIL
+            if (adminEmail) {
+              try {
+                const adminHtml = await render(
+                  EventAdminNotificationEmail({
+                    eventTitle: doc.title,
+                    eventId: String(doc.id),
+                    submitterEmail: submitter.email,
+                    submitterName: submitter.displayName ?? undefined,
+                  }),
+                )
+                await resend.emails.send({
+                  from: FROM_EMAIL,
+                  to: adminEmail,
+                  subject: `New event submission: "${doc.title}"`,
+                  html: adminHtml,
+                })
+              } catch (err) {
+                console.error('[Events] Failed to send admin notification:', err)
+              }
             }
           }
         }

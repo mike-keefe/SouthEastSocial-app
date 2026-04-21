@@ -1,67 +1,156 @@
-# Payload Blank Template
+# SouthEastSocial
 
-This template comes configured with the bare minimum to get started on anything you need.
+Community event listings for SE London. Built with Payload CMS, Next.js App Router, Neon PostgreSQL, Resend email, and Vercel Blob storage.
 
-## Quick start
+## Tech stack
 
-This template can be deployed directly from our Cloud hosting and it will setup MongoDB and cloud S3 object storage for media.
+| Layer | Technology |
+|---|---|
+| Framework | Next.js 16 (App Router) |
+| CMS | Payload CMS 3.x |
+| Database | PostgreSQL via Neon |
+| Email | Resend + React Email |
+| Storage | Vercel Blob |
+| Styling | Tailwind CSS |
+| Deployment | Vercel |
 
-## Quick Start - local setup
+## Local setup
 
-To spin up this template locally, follow these steps:
+### Prerequisites
 
-### Clone
+- Node.js 20+
+- pnpm 9+
+- A [Neon](https://neon.tech) PostgreSQL database
+- A [Resend](https://resend.com) account with a verified sending domain
 
-After you click the `Deploy` button above, you'll want to have standalone copy of this repo on your machine. If you've already cloned this repo, skip to [Development](#development).
+### 1. Clone and install
 
-### Development
+```bash
+git clone https://github.com/mike-keefe/SouthEastSocial-app.git
+cd SouthEastSocial-app
+pnpm install
+```
 
-1. First [clone the repo](#clone) if you have not done so already
-2. `cd my-project && cp .env.example .env` to copy the example environment variables. You'll need to add the `MONGODB_URL` from your Cloud project to your `.env` if you want to use S3 storage and the MongoDB database that was created for you.
+### 2. Environment variables
 
-3. `pnpm install && pnpm dev` to install dependencies and start the dev server
-4. open `http://localhost:3000` to open the app in your browser
+```bash
+cp .env.example .env
+```
 
-That's it! Changes made in `./src` will be reflected in your app. Follow the on-screen instructions to login and create your first admin user. Then check out [Production](#production) once you're ready to build and serve your app, and [Deployment](#deployment) when you're ready to go live.
+Fill in the values (see [Environment variables](#environment-variables) below).
 
-#### Docker (Optional)
+### 3. Run database migrations
 
-If you prefer to use Docker for local development instead of a local MongoDB instance, the provided docker-compose.yml file can be used.
+```bash
+pnpm migrate
+```
 
-To do so, follow these steps:
+### 4. Start the dev server
 
-- Modify the `MONGODB_URL` in your `.env` file to `mongodb://127.0.0.1/<dbname>`
-- Modify the `docker-compose.yml` file's `MONGODB_URL` to match the above `<dbname>`
-- Run `docker-compose up` to start the database, optionally pass `-d` to run in the background.
+```bash
+pnpm dev
+```
 
-## How it works
+Open [http://localhost:3000](http://localhost:3000) for the public site and [http://localhost:3000/admin](http://localhost:3000/admin) for the Payload admin panel.
 
-The Payload config is tailored specifically to the needs of most websites. It is pre-configured in the following ways:
+### 5. Seed sample data (optional)
 
-### Collections
+```bash
+pnpm seed
+```
 
-See the [Collections](https://payloadcms.com/docs/configuration/collections) docs for details on how to extend this functionality.
+This creates 2 categories, 3 venues, 2 organisers, 5 published events, 1 admin, and 1 member user. Credentials are logged to the console.
 
-- #### Users (Authentication)
+---
 
-  Users are auth-enabled collections that have access to the admin panel.
+## Environment variables
 
-  For additional help, see the official [Auth Example](https://github.com/payloadcms/payload/tree/main/examples/auth) or the [Authentication](https://payloadcms.com/docs/authentication/overview#authentication-overview) docs.
+| Variable | Required | Description |
+|---|---|---|
+| `DATABASE_URL` | ✅ | Neon PostgreSQL connection string |
+| `PAYLOAD_SECRET` | ✅ | Random secret for Payload auth token signing. Generate with `openssl rand -base64 32` |
+| `RESEND_API_KEY` | ✅ | Resend API key |
+| `RESEND_FROM_EMAIL` | ✅ | Verified sending address (e.g. `hello@yourdomain.com`) |
+| `NEXT_PUBLIC_SERVER_URL` | ✅ | Public URL of the deployed app, no trailing slash (e.g. `https://southeastsocial.com`) |
+| `BLOB_READ_WRITE_TOKEN` | ✅ in prod | Vercel Blob token — image uploads fall back to local storage without it |
+| `DIGEST_SECRET` | ✅ | Bearer token for the `/api/send-digest` cron endpoint. Generate with `openssl rand -base64 32` |
+| `ADMIN_EMAIL` | Optional | Email address to receive admin notifications when events are submitted |
 
-- #### Media
+---
 
-  This is the uploads enabled collection. It features pre-configured sizes, focal point and manual resizing to help you manage your pictures.
+## Scripts
 
-### Docker
+| Script | Description |
+|---|---|
+| `pnpm dev` | Start development server |
+| `pnpm build` | Production build |
+| `pnpm start` | Start production server |
+| `pnpm lint` | Run ESLint |
+| `pnpm migrate` | Run pending database migrations |
+| `pnpm migrate:create` | Generate a new migration from schema changes |
+| `pnpm seed` | Seed the database with sample data |
+| `pnpm test:int` | Run unit/integration tests (Vitest) |
+| `pnpm test:e2e` | Run end-to-end tests (Playwright) |
+| `pnpm generate:types` | Regenerate Payload TypeScript types |
 
-Alternatively, you can use [Docker](https://www.docker.com) to spin up this template locally. To do so, follow these steps:
+---
 
-1. Follow [steps 1 and 2 from above](#development), the docker-compose file will automatically use the `.env` file in your project root
-1. Next run `docker-compose up`
-1. Follow [steps 4 and 5 from above](#development) to login and create your first admin user
+## Project structure
 
-That's it! The Docker instance will help you get up and running quickly while also standardizing the development environment across your teams.
+```
+src/
+├── app/
+│   ├── (frontend)/        # Public-facing Next.js pages
+│   ├── (payload)/         # Payload admin panel
+│   └── api/               # API routes (send-digest, etc.)
+├── collections/           # Payload collection configs
+├── components/            # Shared React components
+├── lib/
+│   ├── access.ts          # Payload access control helpers
+│   ├── email/             # Resend client + React Email templates
+│   └── env.ts             # Zod-validated environment variables
+└── styles/
+    └── tokens.ts          # Design system tokens
+tests/
+├── int/                   # Vitest unit/integration tests
+└── e2e/                   # Playwright end-to-end tests
+```
 
-## Questions
+---
 
-If you have any issues or questions, reach out to us on [Discord](https://discord.com/invite/payload) or start a [GitHub discussion](https://github.com/payloadcms/payload/discussions).
+## Deployment (Vercel)
+
+1. Connect the GitHub repo to a new Vercel project
+2. Set all required environment variables in the Vercel dashboard
+3. Add the Vercel Blob storage integration
+4. Deploy — Vercel auto-detects Next.js and builds accordingly
+
+The weekly digest cron is configured in `vercel.json` (Thursdays at 10am UTC). Vercel calls `/api/send-digest` with the `DIGEST_SECRET` as a bearer token.
+
+---
+
+## Collections
+
+| Collection | Public access | Auth required |
+|---|---|---|
+| Events | Read published only | Create (submits as pending) |
+| Venues | Read published only | — |
+| Organisers | Read published only | — |
+| Categories | Read all | — |
+| Users | Own profile only | — |
+| Follows | Own follows only | ✅ |
+| EmailSubscriptions | Own record only | ✅ |
+
+Admins can create, update, and delete everything via the admin panel.
+
+---
+
+## Email flows
+
+| Trigger | Email sent | Recipient |
+|---|---|---|
+| User registers | WelcomeEmail | New user |
+| Event submitted | EventSubmittedEmail | Submitter |
+| Event submitted | EventAdminNotificationEmail | `ADMIN_EMAIL` (if set) |
+| Event published | EventApprovedEmail | Submitter |
+| Every Thursday 10am | WeeklyDigestEmail | All opted-in users |
