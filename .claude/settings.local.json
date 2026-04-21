@@ -16,7 +16,12 @@
       "Bash(gh api *)",
       "Bash(git commit -m 'chore: complete phase 1 setup and config *)",
       "Bash(gh pr *)",
-      "Bash(git commit -m 'chore: rebase onto official create-payload-app scaffold *)"
+      "Bash(git commit -m 'chore: rebase onto official create-payload-app scaffold *)",
+      "Bash(git pull *)",
+      "Bash(git stash *)",
+      "Bash(pnpm exec *)",
+      "Bash(DATABASE_URL=postgresql://placeholder PAYLOAD_SECRET=placeholder pnpm generate:types *)",
+      "Bash(git commit -m 'feat\\(collections\\): add all Payload collections and access control *)"
     ]
   }
 }

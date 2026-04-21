@@ -69,6 +69,12 @@ export interface Config {
   collections: {
     users: User;
     media: Media;
+    categories: Category;
+    venues: Venue;
+    organisers: Organiser;
+    events: Event;
+    follows: Follow;
+    'email-subscriptions': EmailSubscription;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -78,13 +84,19 @@ export interface Config {
   collectionsSelect: {
     users: UsersSelect<false> | UsersSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
+    categories: CategoriesSelect<false> | CategoriesSelect<true>;
+    venues: VenuesSelect<false> | VenuesSelect<true>;
+    organisers: OrganisersSelect<false> | OrganisersSelect<true>;
+    events: EventsSelect<false> | EventsSelect<true>;
+    follows: FollowsSelect<false> | FollowsSelect<true>;
+    'email-subscriptions': EmailSubscriptionsSelect<false> | EmailSubscriptionsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
   };
   db: {
-    defaultIDType: string;
+    defaultIDType: number;
   };
   fallbackLocale: null;
   globals: {};
@@ -122,7 +134,11 @@ export interface UserAuthOperations {
  * via the `definition` "users".
  */
 export interface User {
-  id: string;
+  id: number;
+  role: 'admin' | 'member';
+  displayName?: string | null;
+  bio?: string | null;
+  avatar?: (number | null) | Media;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -147,7 +163,7 @@ export interface User {
  * via the `definition` "media".
  */
 export interface Media {
-  id: string;
+  id: number;
   alt: string;
   updatedAt: string;
   createdAt: string;
@@ -160,13 +176,208 @@ export interface Media {
   height?: number | null;
   focalX?: number | null;
   focalY?: number | null;
+  sizes?: {
+    thumbnail?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    card?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "categories".
+ */
+export interface Category {
+  id: number;
+  name: string;
+  /**
+   * Auto-generated from name. Can be overridden.
+   */
+  slug?: string | null;
+  /**
+   * Hex colour used for UI badges (e.g. #6366f1)
+   */
+  colour?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "venues".
+ */
+export interface Venue {
+  id: number;
+  name: string;
+  /**
+   * Auto-generated from name. Can be overridden.
+   */
+  slug?: string | null;
+  status: 'draft' | 'published';
+  description?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  address?: string | null;
+  postcode: string;
+  image?: (number | null) | Media;
+  website?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "organisers".
+ */
+export interface Organiser {
+  id: number;
+  name: string;
+  /**
+   * Auto-generated from name. Can be overridden.
+   */
+  slug?: string | null;
+  status: 'draft' | 'published';
+  bio?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  image?: (number | null) | Media;
+  website?: string | null;
+  /**
+   * Optional: link this organiser to a member account
+   */
+  linkedUser?: (number | null) | User;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "events".
+ */
+export interface Event {
+  id: number;
+  title: string;
+  /**
+   * Auto-generated from title. Can be overridden by admins.
+   */
+  slug?: string | null;
+  status: 'draft' | 'pending' | 'published';
+  description: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  image?: (number | null) | Media;
+  category?: (number | null) | Category;
+  venue?: (number | null) | Venue;
+  organiser?: (number | null) | Organiser;
+  postcode?: string | null;
+  startDate: string;
+  endDate?: string | null;
+  price?: string | null;
+  ticketUrl?: string | null;
+  /**
+   * Set automatically to the logged-in user on create.
+   */
+  submittedBy?: (number | null) | User;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "follows".
+ */
+export interface Follow {
+  id: number;
+  /**
+   * Set automatically to the logged-in user.
+   */
+  user: number | User;
+  followType: 'venue' | 'organiser';
+  /**
+   * Required when followType is "venue".
+   */
+  venue?: (number | null) | Venue;
+  /**
+   * Required when followType is "organiser".
+   */
+  organiser?: (number | null) | Organiser;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * One record per user, auto-created on registration.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "email-subscriptions".
+ */
+export interface EmailSubscription {
+  id: number;
+  user: number | User;
+  /**
+   * Receive weekly event digest emails
+   */
+  weeklyDigest?: boolean | null;
+  /**
+   * Receive an email when a submitted event is approved
+   */
+  eventApproved?: boolean | null;
+  /**
+   * Receive a welcome email on sign-up
+   */
+  welcomeEmail?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
-  id: string;
+  id: number;
   key: string;
   data:
     | {
@@ -183,20 +394,44 @@ export interface PayloadKv {
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
-  id: string;
+  id: number;
   document?:
     | ({
         relationTo: 'users';
-        value: string | User;
+        value: number | User;
       } | null)
     | ({
         relationTo: 'media';
-        value: string | Media;
+        value: number | Media;
+      } | null)
+    | ({
+        relationTo: 'categories';
+        value: number | Category;
+      } | null)
+    | ({
+        relationTo: 'venues';
+        value: number | Venue;
+      } | null)
+    | ({
+        relationTo: 'organisers';
+        value: number | Organiser;
+      } | null)
+    | ({
+        relationTo: 'events';
+        value: number | Event;
+      } | null)
+    | ({
+        relationTo: 'follows';
+        value: number | Follow;
+      } | null)
+    | ({
+        relationTo: 'email-subscriptions';
+        value: number | EmailSubscription;
       } | null);
   globalSlug?: string | null;
   user: {
     relationTo: 'users';
-    value: string | User;
+    value: number | User;
   };
   updatedAt: string;
   createdAt: string;
@@ -206,10 +441,10 @@ export interface PayloadLockedDocument {
  * via the `definition` "payload-preferences".
  */
 export interface PayloadPreference {
-  id: string;
+  id: number;
   user: {
     relationTo: 'users';
-    value: string | User;
+    value: number | User;
   };
   key?: string | null;
   value?:
@@ -229,7 +464,7 @@ export interface PayloadPreference {
  * via the `definition` "payload-migrations".
  */
 export interface PayloadMigration {
-  id: string;
+  id: number;
   name?: string | null;
   batch?: number | null;
   updatedAt: string;
@@ -240,6 +475,10 @@ export interface PayloadMigration {
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
+  role?: T;
+  displayName?: T;
+  bio?: T;
+  avatar?: T;
   updatedAt?: T;
   createdAt?: T;
   email?: T;
@@ -274,6 +513,118 @@ export interface MediaSelect<T extends boolean = true> {
   height?: T;
   focalX?: T;
   focalY?: T;
+  sizes?:
+    | T
+    | {
+        thumbnail?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+        card?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+      };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "categories_select".
+ */
+export interface CategoriesSelect<T extends boolean = true> {
+  name?: T;
+  slug?: T;
+  colour?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "venues_select".
+ */
+export interface VenuesSelect<T extends boolean = true> {
+  name?: T;
+  slug?: T;
+  status?: T;
+  description?: T;
+  address?: T;
+  postcode?: T;
+  image?: T;
+  website?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "organisers_select".
+ */
+export interface OrganisersSelect<T extends boolean = true> {
+  name?: T;
+  slug?: T;
+  status?: T;
+  bio?: T;
+  image?: T;
+  website?: T;
+  linkedUser?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "events_select".
+ */
+export interface EventsSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  status?: T;
+  description?: T;
+  image?: T;
+  category?: T;
+  venue?: T;
+  organiser?: T;
+  postcode?: T;
+  startDate?: T;
+  endDate?: T;
+  price?: T;
+  ticketUrl?: T;
+  submittedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "follows_select".
+ */
+export interface FollowsSelect<T extends boolean = true> {
+  user?: T;
+  followType?: T;
+  venue?: T;
+  organiser?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "email-subscriptions_select".
+ */
+export interface EmailSubscriptionsSelect<T extends boolean = true> {
+  user?: T;
+  weeklyDigest?: T;
+  eventApproved?: T;
+  welcomeEmail?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
