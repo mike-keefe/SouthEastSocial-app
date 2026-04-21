@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git init *)",
+      "Bash(git checkout *)",
+      "Bash(mkdir -p /Users/mikekeefe/code/personal/south-east-social/src/app/\\\\\\(payload\\\\\\)/admin/\\\\[\\\\[...segments\\\\]\\\\])",
+      "Bash(mkdir -p /Users/mikekeefe/code/personal/south-east-social/src/app/\\\\\\(payload\\\\\\)/api/\\\\[...slug\\\\])",
+      "Bash(pnpm install *)",
+      "Bash(pnpm dlx *)",
+      "Bash(git add *)",
+      "Bash(git commit --no-verify -m 'chore: initial project scaffold *)"
+    ]
+  }
+}
