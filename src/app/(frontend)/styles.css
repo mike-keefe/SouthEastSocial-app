@@ -7,24 +7,18 @@
   --foreground: #1a1614;
 }
 
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-}
+@layer base {
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+  }
 
-html {
-  -webkit-font-smoothing: antialiased;
-}
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-display), 'Georgia', serif;
+  }
 
-body {
-  background-color: var(--background);
-  color: var(--foreground);
-  margin: 0;
-}
-
-img {
-  max-width: 100%;
-  height: auto;
-  display: block;
+  *:focus-visible {
+    outline: 2px solid #f95016;
+    outline-offset: 2px;
+  }
 }
