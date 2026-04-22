@@ -2,23 +2,28 @@ import { PageWrapper } from '@/components/PageWrapper'
 
 function SkeletonCard() {
   return (
-    <div className="bg-white rounded-xl overflow-hidden shadow-sm animate-pulse">
-      <div className="aspect-[16/9] bg-neutral-200" />
-      <div className="p-4 space-y-2">
-        <div className="h-5 bg-neutral-200 rounded w-2/3" />
-        <div className="h-4 bg-neutral-200 rounded w-1/2" />
-      </div>
+    <div className="bg-neutral-900 overflow-hidden animate-pulse">
+      <div className="aspect-[16/9] bg-neutral-800" />
     </div>
   )
 }
 
 export default function VenuesLoading() {
   return (
-    <div className="py-10">
+    <div className="bg-neutral-950 min-h-screen">
+      <div className="border-b border-neutral-800">
+        <PageWrapper>
+          <div className="py-10">
+            <div className="h-3 bg-neutral-800 w-24 mb-3 animate-pulse" />
+            <div className="h-8 bg-neutral-800 w-36 animate-pulse" />
+          </div>
+        </PageWrapper>
+      </div>
       <PageWrapper>
-        <div className="h-9 bg-neutral-200 rounded w-28 mb-10 animate-pulse" />
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)}
+        <div className="py-6">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-px bg-neutral-800">
+            {Array.from({ length: 8 }).map((_, i) => <SkeletonCard key={i} />)}
+          </div>
         </div>
       </PageWrapper>
     </div>
