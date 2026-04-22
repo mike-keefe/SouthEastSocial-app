@@ -5,6 +5,7 @@ import configPromise from '@payload-config'
 import { PageWrapper } from '@/components/PageWrapper'
 import { EventCard } from '@/components/EventCard'
 import { EventFilters } from '@/components/EventFilters'
+import { SE_NEIGHBOURHOODS, getNeighbourhoodBySlug } from '@/lib/neighbourhoods'
 import type { Event, Category } from '@/payload-types'
 import type { Metadata } from 'next'
 import type { Where } from 'payload'
@@ -16,8 +17,8 @@ export const metadata: Metadata = {
 
 type SearchParams = {
   q?: string
+  area?: string
   category?: string
-  postcode?: string
   free?: string
   page?: string
 }
@@ -34,8 +35,20 @@ async function getEvents(params: SearchParams) {
 
   if (params.q)        conditions.push({ title: { contains: params.q } })
   if (params.category) conditions.push({ 'category.slug': { equals: params.category } })
-  if (params.postcode) conditions.push({ postcode: { contains: params.postcode.toUpperCase() } })
   if (params.free === 'true') conditions.push({ price: { contains: 'Free' } })
+
+  if (params.area) {
+    const neighbourhood = getNeighbourhoodBySlug(params.area)
+    if (neighbourhood) {
+      const districtConditions: Where[] = neighbourhood.districts.flatMap((d) => ([
+        { postcode: { contains: d } } as Where,
+        { 'venue.postcode': { contains: d } } as Where,
+      ]))
+      if (districtConditions.length > 0) {
+        conditions.push({ or: districtConditions })
+      }
+    }
+  }
 
   return payload.find({
     collection: 'events',
@@ -63,7 +76,8 @@ export default async function EventsPage({ searchParams }: Props) {
   ])
 
   const currentPage = Number(page) || 1
-  const hasFilters = !!(params.q || params.category || params.postcode || params.free)
+  const hasFilters = !!(params.q || params.area || params.category || params.free)
+  const activeNeighbourhood = params.area ? getNeighbourhoodBySlug(params.area) : null
 
   return (
     <div className="min-h-screen bg-neutral-950">
@@ -75,8 +89,11 @@ export default async function EventsPage({ searchParams }: Props) {
               SE London
             </p>
             <h1 className="font-display font-bold text-3xl sm:text-4xl text-white">
-              What&apos;s on
+              {activeNeighbourhood ? `What's on in ${activeNeighbourhood.name}` : "What's on"}
             </h1>
+            {activeNeighbourhood && (
+              <p className="text-neutral-500 text-sm mt-2">{activeNeighbourhood.tagline}</p>
+            )}
             {hasFilters && (
               <div className="mt-3 flex items-center gap-3">
                 <span className="text-neutral-500 text-sm">Filtered results</span>
@@ -96,7 +113,7 @@ export default async function EventsPage({ searchParams }: Props) {
         {/* Filters */}
         <div className="border-b border-neutral-800 py-5">
           <Suspense>
-            <EventFilters categories={categories} />
+            <EventFilters categories={categories} neighbourhoods={SE_NEIGHBOURHOODS} />
           </Suspense>
         </div>
 
@@ -140,8 +157,8 @@ export default async function EventsPage({ searchParams }: Props) {
                 {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => {
                   const ps = new URLSearchParams()
                   if (params.q)        ps.set('q', params.q)
+                  if (params.area)     ps.set('area', params.area)
                   if (params.category) ps.set('category', params.category)
-                  if (params.postcode) ps.set('postcode', params.postcode)
                   if (params.free)     ps.set('free', params.free)
                   ps.set('page', String(p))
 

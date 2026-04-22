@@ -4,7 +4,6 @@ import Link from 'next/link'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
-import { PageWrapper } from '@/components/PageWrapper'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -45,9 +44,8 @@ export default function LoginPage() {
   const labelCls = 'block text-[9px] font-bold uppercase tracking-[0.15em] text-neutral-500 mb-1.5'
 
   return (
-    <div className="bg-neutral-950 min-h-screen flex items-center">
-      <PageWrapper narrow>
-        <div className="max-w-sm mx-auto py-16">
+    <div className="bg-neutral-950 min-h-screen flex items-center justify-center px-4 sm:px-6">
+      <div className="w-full max-w-lg py-16">
           <div className="mb-10">
             <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-neutral-600 mb-3">
               SouthEastSocial
@@ -107,8 +105,7 @@ export default function LoginPage() {
               </button>
             </div>
           </form>
-        </div>
-      </PageWrapper>
+      </div>
     </div>
   )
 }

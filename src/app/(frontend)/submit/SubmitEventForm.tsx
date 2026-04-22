@@ -4,6 +4,11 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { VenueSelector } from '@/components/VenueSelector'
+import { StyledSelect } from '@/components/StyledSelect'
+import { DateTimePicker } from '@/components/DateTimePicker'
+import { RichTextEditor } from '@/components/RichTextEditor'
+import { ImageUpload } from '@/components/ImageUpload'
+import { htmlToLexical } from '@/lib/richtext'
 import type { Category, Venue } from '@/payload-types'
 
 type Props = {
@@ -16,9 +21,12 @@ const minDateTime = () => new Date(Date.now() - 60_000).toISOString().slice(0, 1
 export function SubmitEventForm({ categories, venues }: Props) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
+  const [descHtml, setDescHtml] = useState('')
+  const [imageId, setImageId] = useState<number | null>(null)
+  const [imagePreview, setImagePreview] = useState<string | null>(null)
+  const [imageUploading, setImageUploading] = useState(false)
   const [form, setForm] = useState({
     title: '',
-    description: '',
     category: '',
     venue: '',
     postcode: '',
@@ -32,6 +40,29 @@ export function SubmitEventForm({ categories, venues }: Props) {
     setForm((prev) => ({ ...prev, [field]: value }))
   }
 
+  async function handleImageFile(file: File) {
+    setImageUploading(true)
+    try {
+      const fd = new FormData()
+      fd.append('file', file)
+      fd.append('alt', form.title || file.name.replace(/\.[^.]+$/, ''))
+      const res = await fetch('/api/media', { method: 'POST', body: fd })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data?.errors?.[0]?.message ?? 'Upload failed')
+      setImageId(data.doc.id)
+      setImagePreview(URL.createObjectURL(file))
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Image upload failed')
+    } finally {
+      setImageUploading(false)
+    }
+  }
+
+  function clearImage() {
+    setImageId(null)
+    setImagePreview(null)
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setLoading(true)
@@ -39,26 +70,7 @@ export function SubmitEventForm({ categories, venues }: Props) {
     try {
       const body: Record<string, unknown> = {
         title: form.title,
-        description: {
-          root: {
-            type: 'root',
-            children: form.description
-              .split('\n\n')
-              .filter(Boolean)
-              .map((para) => ({
-                type: 'paragraph',
-                version: 1,
-                children: [{ type: 'text', text: para.trim(), version: 1 }],
-                direction: 'ltr',
-                format: '',
-                indent: 0,
-              })),
-            direction: 'ltr',
-            format: '',
-            indent: 0,
-            version: 1,
-          },
-        },
+        description: htmlToLexical(descHtml),
         postcode: form.postcode,
         startDate: form.startDate,
         price: form.price,
@@ -67,6 +79,7 @@ export function SubmitEventForm({ categories, venues }: Props) {
       if (form.category) body.category = Number(form.category)
       if (form.venue)    body.venue    = Number(form.venue)
       if (form.endDate)  body.endDate  = form.endDate
+      if (imageId)       body.image    = imageId
 
       const res = await fetch('/api/events', {
         method: 'POST',
@@ -77,8 +90,7 @@ export function SubmitEventForm({ categories, venues }: Props) {
       const data = await res.json()
 
       if (!res.ok) {
-        const message = data?.errors?.[0]?.message ?? 'Could not submit event'
-        toast.error(message)
+        toast.error(data?.errors?.[0]?.message ?? 'Could not submit event')
         return
       }
 
@@ -119,35 +131,38 @@ export function SubmitEventForm({ categories, venues }: Props) {
         </div>
 
         <div>
-          <label htmlFor="description" className={labelCls}>
+          <span className={labelCls}>
             Description <span className="text-primary-400">*</span>
-          </label>
-          <textarea
-            id="description"
-            required
-            value={form.description}
-            onChange={(e) => set('description', e.target.value)}
-            rows={6}
-            className="w-full px-4 py-3 border border-neutral-700 bg-neutral-800 text-white text-sm placeholder:text-neutral-600 focus:outline-none focus:ring-2 focus:ring-primary-400 resize-y transition-colors"
-            placeholder="Tell people what to expect. Separate paragraphs with a blank line."
+          </span>
+          <RichTextEditor
+            value={descHtml}
+            onChange={setDescHtml}
+            placeholder="Tell people what to expect…"
           />
         </div>
 
         <div>
           <label htmlFor="category" className={labelCls}>Category</label>
-          <select
+          <StyledSelect
             id="category"
             value={form.category}
             onChange={(e) => set('category', e.target.value)}
-            className={inputCls}
           >
             <option value="">Select a category</option>
             {categories.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.name}
-              </option>
+              <option key={c.id} value={c.id}>{c.name}</option>
             ))}
-          </select>
+          </StyledSelect>
+        </div>
+
+        <div>
+          <span className={labelCls}>Event image</span>
+          <ImageUpload
+            imagePreview={imagePreview}
+            uploading={imageUploading}
+            onFile={handleImageFile}
+            onClear={clearImage}
+          />
         </div>
       </fieldset>
 
@@ -160,25 +175,21 @@ export function SubmitEventForm({ categories, venues }: Props) {
             <label htmlFor="startDate" className={labelCls}>
               Start <span className="text-primary-400">*</span>
             </label>
-            <input
+            <DateTimePicker
               id="startDate"
-              type="datetime-local"
               required
               min={minDateTime()}
               value={form.startDate}
-              onChange={(e) => set('startDate', e.target.value)}
-              className={inputCls}
+              onChange={(v) => set('startDate', v)}
             />
           </div>
           <div>
             <label htmlFor="endDate" className={labelCls}>End</label>
-            <input
+            <DateTimePicker
               id="endDate"
-              type="datetime-local"
               min={form.startDate || minDateTime()}
               value={form.endDate}
-              onChange={(e) => set('endDate', e.target.value)}
-              className={inputCls}
+              onChange={(v) => set('endDate', v)}
             />
           </div>
         </div>
@@ -249,7 +260,7 @@ export function SubmitEventForm({ categories, venues }: Props) {
       <div className="pt-2">
         <button
           type="submit"
-          disabled={loading}
+          disabled={loading || imageUploading}
           className="w-full py-3.5 bg-primary-400 hover:bg-primary-300 disabled:opacity-40 text-black font-bold text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-primary-400"
         >
           {loading ? 'Submitting…' : 'Submit event for review'}

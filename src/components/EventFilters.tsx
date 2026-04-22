@@ -3,12 +3,14 @@
 import { useRouter, useSearchParams, usePathname } from 'next/navigation'
 import { useCallback } from 'react'
 import type { Category } from '@/payload-types'
+import type { NeighbourhoodSeed } from '@/lib/neighbourhoods'
 
 type Props = {
   categories: Category[]
+  neighbourhoods: NeighbourhoodSeed[]
 }
 
-export function EventFilters({ categories }: Props) {
+export function EventFilters({ categories, neighbourhoods }: Props) {
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
@@ -48,6 +50,25 @@ export function EventFilters({ categories }: Props) {
       </div>
 
       <div className="flex flex-col">
+        <label htmlFor="filter-area" className={labelCls}>
+          Area
+        </label>
+        <select
+          id="filter-area"
+          defaultValue={searchParams.get('area') ?? ''}
+          onChange={(e) => updateParam('area', e.target.value)}
+          className={inputCls}
+        >
+          <option value="">All areas</option>
+          {neighbourhoods.map((n) => (
+            <option key={n.slug} value={n.slug}>
+              {n.name}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <div className="flex flex-col">
         <label htmlFor="filter-category" className={labelCls}>
           Category
         </label>
@@ -66,20 +87,6 @@ export function EventFilters({ categories }: Props) {
         </select>
       </div>
 
-      <div className="flex flex-col">
-        <label htmlFor="filter-postcode" className={labelCls}>
-          Postcode
-        </label>
-        <input
-          id="filter-postcode"
-          type="text"
-          placeholder="e.g. SE15"
-          defaultValue={searchParams.get('postcode') ?? ''}
-          onChange={(e) => updateParam('postcode', e.target.value)}
-          className={`${inputCls} w-28`}
-        />
-      </div>
-
       <label className="flex items-center gap-2 text-sm cursor-pointer self-end h-9">
         <input
           type="checkbox"
@@ -91,8 +98,8 @@ export function EventFilters({ categories }: Props) {
       </label>
 
       {(searchParams.get('q') ||
+        searchParams.get('area') ||
         searchParams.get('category') ||
-        searchParams.get('postcode') ||
         searchParams.get('free')) && (
         <button
           onClick={() => router.push(pathname)}

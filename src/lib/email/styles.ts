@@ -51,9 +51,9 @@ export const emailTextSm: CSSProperties = {
 }
 
 export const emailButton: CSSProperties = {
-  backgroundColor: colors.primary[500],
+  backgroundColor: colors.primary[400],
   borderRadius: radii.md,
-  color: '#ffffff',
+  color: colors.neutral[950],
   display: 'inline-block',
   fontSize: fontSizes.base,
   fontWeight: fontWeights.semibold,
@@ -62,9 +62,9 @@ export const emailButton: CSSProperties = {
 }
 
 export const emailButtonSm: CSSProperties = {
-  backgroundColor: colors.primary[500],
+  backgroundColor: colors.primary[400],
   borderRadius: radii.md,
-  color: '#ffffff',
+  color: colors.neutral[950],
   display: 'inline-block',
   fontSize: '15px',
   fontWeight: fontWeights.semibold,
@@ -92,7 +92,7 @@ export const emailFooter: CSSProperties = {
 }
 
 export const emailLink: CSSProperties = {
-  color: colors.primary[500],
+  color: colors.primary[600],
 }
 
 export const emailInfoBox: CSSProperties = {

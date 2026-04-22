@@ -1,7 +1,14 @@
 import Link from 'next/link'
+import { headers as getHeaders } from 'next/headers'
+import { getPayload } from 'payload'
+import configPromise from '@payload-config'
 import { PageWrapper } from './PageWrapper'
+import { LogoutButton } from './LogoutButton'
 
-export function Footer() {
+export async function Footer() {
+  const headers = await getHeaders()
+  const payload = await getPayload({ config: configPromise })
+  const { user } = await payload.auth({ headers })
   const year = new Date().getFullYear()
 
   return (
@@ -46,16 +53,16 @@ export function Footer() {
             </p>
             <ul className="space-y-2.5 text-[13px]">
               {[
-                { label: 'Peckham', postcode: 'SE15' },
-                { label: 'Deptford', postcode: 'SE8' },
-                { label: 'New Cross', postcode: 'SE14' },
-                { label: 'Bermondsey', postcode: 'SE1' },
-                { label: 'Camberwell', postcode: 'SE5' },
-                { label: 'Lewisham', postcode: 'SE13' },
-              ].map(({ label, postcode }) => (
-                <li key={label}>
+                { label: 'Peckham', slug: 'peckham' },
+                { label: 'Deptford', slug: 'deptford' },
+                { label: 'New Cross', slug: 'new-cross' },
+                { label: 'Borough & Southwark', slug: 'borough' },
+                { label: 'Camberwell', slug: 'camberwell' },
+                { label: 'Lewisham', slug: 'lewisham' },
+              ].map(({ label, slug }) => (
+                <li key={slug}>
                   <Link
-                    href={`/events?postcode=${encodeURIComponent(postcode)}`}
+                    href={`/areas/${slug}`}
                     className="hover:text-white transition-colors"
                   >
                     {label}
@@ -71,17 +78,31 @@ export function Footer() {
               Account
             </p>
             <ul className="space-y-2.5 text-[13px]">
-              {[
-                { href: '/login', label: 'Log in' },
-                { href: '/signup', label: 'Sign up' },
-                { href: '/account', label: 'Dashboard' },
-              ].map(({ href, label }) => (
-                <li key={href}>
-                  <Link href={href} className="hover:text-white transition-colors">
-                    {label}
-                  </Link>
-                </li>
-              ))}
+              {user ? (
+                <>
+                  <li>
+                    <Link href="/account" className="hover:text-white transition-colors">
+                      Dashboard
+                    </Link>
+                  </li>
+                  <li>
+                    <LogoutButton className="hover:text-white transition-colors" />
+                  </li>
+                </>
+              ) : (
+                <>
+                  <li>
+                    <Link href="/login" className="hover:text-white transition-colors">
+                      Log in
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href="/signup" className="hover:text-white transition-colors">
+                      Sign up
+                    </Link>
+                  </li>
+                </>
+              )}
             </ul>
           </div>
         </div>

@@ -2,6 +2,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { MapPin } from 'lucide-react'
 import type { Event, Category, Media, Venue } from '@/payload-types'
+import { formatEventDateParts } from '@/lib/dates'
 
 type Props = { event: Event }
 
@@ -19,14 +20,7 @@ function fallbackGradient(id: number | string) {
   return FALLBACK_GRADIENTS[n % FALLBACK_GRADIENTS.length]
 }
 
-function formatEventDate(iso: string) {
-  const d = new Date(iso)
-  return {
-    day: d.getDate(),
-    weekday: d.toLocaleDateString('en-GB', { weekday: 'short' }).toUpperCase(),
-    month: d.toLocaleDateString('en-GB', { month: 'short' }).toUpperCase(),
-  }
-}
+const formatEventDate = formatEventDateParts
 
 export function EventCard({ event }: Props) {
   const category = typeof event.category === 'object' ? (event.category as Category) : null

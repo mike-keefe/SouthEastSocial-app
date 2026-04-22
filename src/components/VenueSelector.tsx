@@ -66,8 +66,8 @@ export function VenueSelector({ venues, value, onChange }: Props) {
         </div>
       )}
 
-      {/* Venue tiles */}
-      {venues.length > 0 && (
+      {/* Venue tiles — only shown after the user starts typing */}
+      {search.length > 0 && (
         <div
           role="group"
           aria-label="Select a venue"
