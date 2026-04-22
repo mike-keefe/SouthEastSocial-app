@@ -13,7 +13,7 @@ export async function POST(req: Request) {
   }
   const token = authHeader.slice(7)
 
-  if (!token || token !== process.env.DIGEST_SECRET) {
+  if (!token || token !== process.env.CRON_SECRET) {
     return NextResponse.json({ error: 'Unauthorized', code: 'INVALID_TOKEN' }, { status: 401 })
   }
 
