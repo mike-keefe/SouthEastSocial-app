@@ -6,6 +6,7 @@ import { EventSubmittedEmail } from '../lib/email/templates/EventSubmittedEmail'
 import { EventApprovedEmail } from '../lib/email/templates/EventApprovedEmail'
 import { EventAdminNotificationEmail } from '../lib/email/templates/EventAdminNotificationEmail'
 import { render } from '@react-email/render'
+import { logEmail } from '../lib/email/logEmail'
 
 const SE_POSTCODE_REGEX = /^SE\d/i
 
@@ -194,23 +195,22 @@ export const Events: CollectionConfig = {
         if (operation === 'create') {
           const submitter = await getSubmitter()
           if (submitter?.email) {
+            const submittedSubject = `Your event "${doc.title}" has been submitted`
             try {
               const html = await render(
                 EventSubmittedEmail({ eventTitle: doc.title, displayName: submitter.displayName ?? undefined }),
               )
-              await resend.emails.send({
-                from: FROM_EMAIL,
-                to: submitter.email,
-                subject: `Your event "${doc.title}" has been submitted`,
-                html,
-              })
+              await resend.emails.send({ from: FROM_EMAIL, to: submitter.email, subject: submittedSubject, html })
+              await logEmail(req.payload, { recipient: submitter.email, type: 'event-submitted', subject: submittedSubject, status: 'sent' })
             } catch (err) {
               console.error('[Events] Failed to send EventSubmittedEmail:', err)
+              await logEmail(req.payload, { recipient: submitter.email, type: 'event-submitted', subject: submittedSubject, status: 'failed', errorMessage: err instanceof Error ? err.message : String(err) })
             }
 
             // Notify admin that a new event needs review
             const adminEmail = process.env.ADMIN_EMAIL
             if (adminEmail) {
+              const adminSubject = `New event submission: "${doc.title}"`
               try {
                 const adminHtml = await render(
                   EventAdminNotificationEmail({
@@ -220,14 +220,11 @@ export const Events: CollectionConfig = {
                     submitterName: submitter.displayName ?? undefined,
                   }),
                 )
-                await resend.emails.send({
-                  from: FROM_EMAIL,
-                  to: adminEmail,
-                  subject: `New event submission: "${doc.title}"`,
-                  html: adminHtml,
-                })
+                await resend.emails.send({ from: FROM_EMAIL, to: adminEmail, subject: adminSubject, html: adminHtml })
+                await logEmail(req.payload, { recipient: adminEmail, type: 'admin-notification', subject: adminSubject, status: 'sent' })
               } catch (err) {
                 console.error('[Events] Failed to send admin notification:', err)
+                await logEmail(req.payload, { recipient: adminEmail, type: 'admin-notification', subject: adminSubject, status: 'failed', errorMessage: err instanceof Error ? err.message : String(err) })
               }
             }
           }
@@ -243,6 +240,7 @@ export const Events: CollectionConfig = {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const wantsEmail = (submitter as any)?.emailPreferences?.eventApproved !== false
           if (submitter?.email && wantsEmail) {
+            const approvedSubject = `Your event "${doc.title}" is now live`
             try {
               const html = await render(
                 EventApprovedEmail({
@@ -251,14 +249,11 @@ export const Events: CollectionConfig = {
                   displayName: submitter.displayName ?? undefined,
                 }),
               )
-              await resend.emails.send({
-                from: FROM_EMAIL,
-                to: submitter.email,
-                subject: `Your event "${doc.title}" is now live`,
-                html,
-              })
+              await resend.emails.send({ from: FROM_EMAIL, to: submitter.email, subject: approvedSubject, html })
+              await logEmail(req.payload, { recipient: submitter.email, type: 'event-approved', subject: approvedSubject, status: 'sent' })
             } catch (err) {
               console.error('[Events] Failed to send EventApprovedEmail:', err)
+              await logEmail(req.payload, { recipient: submitter.email, type: 'event-approved', subject: approvedSubject, status: 'failed', errorMessage: err instanceof Error ? err.message : String(err) })
             }
           }
         }

@@ -4,6 +4,7 @@ import { render } from '@react-email/render'
 import { NextResponse } from 'next/server'
 import { resend, FROM_EMAIL } from '@/lib/email/resend'
 import { WeeklyDigestEmail, type DigestEvent } from '@/lib/email/templates/WeeklyDigestEmail'
+import { createUnsubscribeToken } from '@/lib/email/unsubscribeToken'
 
 export async function POST(req: Request) {
   const authHeader = req.headers.get('authorization')
@@ -49,6 +50,7 @@ export async function POST(req: Request) {
     depth: 0,
   })
 
+  const siteUrl = process.env.NEXT_PUBLIC_SERVER_URL || 'https://southeastsocial.mikekeefe.com'
   let sent = 0
   let failed = 0
 
@@ -116,15 +118,28 @@ export async function POST(req: Request) {
       }
     }
 
+    const unsubscribeToken = createUnsubscribeToken(String(userId))
+    const unsubscribeUrl = `${siteUrl}/api/unsubscribe?token=${unsubscribeToken}`
+
     try {
       const html = await render(
-        WeeklyDigestEmail({ displayName: displayName ?? undefined, featuredEvents, personalisedEvents, hasFollows }),
+        WeeklyDigestEmail({
+          displayName: displayName ?? undefined,
+          featuredEvents,
+          personalisedEvents,
+          hasFollows,
+          unsubscribeUrl,
+        }),
       )
       await resend.emails.send({
         from: FROM_EMAIL,
         to: userEmail,
         subject: 'This week in SE London — your SouthEastSocial digest',
         html,
+        headers: {
+          'List-Unsubscribe': `<${unsubscribeUrl}>`,
+          'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
+        },
       })
       sent++
     } catch (err) {
