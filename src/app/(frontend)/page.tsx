@@ -3,6 +3,7 @@ import { getPayload } from 'payload'
 import configPromise from '@payload-config'
 import { PageWrapper } from '@/components/PageWrapper'
 import { EventCard } from '@/components/EventCard'
+import { SE_NEIGHBOURHOODS } from '@/lib/neighbourhoods'
 import type { Event } from '@/payload-types'
 import type { Metadata } from 'next'
 
@@ -40,14 +41,7 @@ async function getUpcomingEvents(): Promise<Event[]> {
   return docs as Event[]
 }
 
-const NEIGHBOURHOODS = [
-  { label: 'Peckham',    postcode: 'SE15' },
-  { label: 'Deptford',   postcode: 'SE8'  },
-  { label: 'New Cross',  postcode: 'SE14' },
-  { label: 'Bermondsey', postcode: 'SE1'  },
-  { label: 'Camberwell', postcode: 'SE5'  },
-  { label: 'Lewisham',   postcode: 'SE13' },
-]
+const FEATURED_AREAS = SE_NEIGHBOURHOODS.filter((n) => n.featured).slice(0, 6)
 
 function formatTickerDate(iso: string) {
   return new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }).toUpperCase()
@@ -112,13 +106,6 @@ export default async function HomePage() {
                   aria-label="Search events by keyword"
                   className="flex-1 h-12 px-4 bg-neutral-900 text-white placeholder:text-neutral-600 text-sm focus:outline-none border-b sm:border-b-0 sm:border-r border-neutral-700"
                 />
-                <input
-                  name="postcode"
-                  type="text"
-                  placeholder="Postcode"
-                  aria-label="Filter by SE postcode"
-                  className="w-full sm:w-28 h-12 px-4 bg-neutral-900 text-white placeholder:text-neutral-600 text-sm focus:outline-none uppercase"
-                />
                 <button
                   type="submit"
                   className="h-12 px-6 bg-primary-400 hover:bg-primary-300 text-black font-bold text-sm transition-colors whitespace-nowrap focus:outline-none focus:ring-2 focus:ring-primary-400 focus:ring-inset shrink-0"
@@ -133,13 +120,13 @@ export default async function HomePage() {
               <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-neutral-600 px-1 mr-2">
                 Areas
               </span>
-              {NEIGHBOURHOODS.map(({ label, postcode }) => (
+              {FEATURED_AREAS.map((n) => (
                 <Link
-                  key={label}
-                  href={`/events?postcode=${encodeURIComponent(postcode)}`}
+                  key={n.slug}
+                  href={`/areas/${n.slug}`}
                   className="text-[12px] text-neutral-500 hover:text-white hover:bg-neutral-800 px-3 py-1.5 transition-colors border-l border-neutral-800 first-of-type:border-l-0 focus:outline-none focus:ring-2 focus:ring-primary-400"
                 >
-                  {label}
+                  {n.name}
                 </Link>
               ))}
             </div>
@@ -223,17 +210,17 @@ export default async function HomePage() {
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-3 divide-x divide-y divide-neutral-800 border-x border-b border-neutral-800">
-            {NEIGHBOURHOODS.map(({ label, postcode }) => (
+            {FEATURED_AREAS.map((n) => (
               <Link
-                key={label}
-                href={`/events?postcode=${encodeURIComponent(postcode)}`}
+                key={n.slug}
+                href={`/areas/${n.slug}`}
                 className="group p-6 sm:p-8 hover:bg-neutral-900 transition-colors focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary-400"
               >
                 <p className="font-display font-bold text-2xl sm:text-3xl text-neutral-700 group-hover:text-primary-400 transition-colors mb-1 tabular-nums">
-                  {postcode}
+                  {n.districts[0]}
                 </p>
                 <p className="text-[13px] font-medium text-neutral-400 group-hover:text-white transition-colors">
-                  {label}
+                  {n.name}
                 </p>
               </Link>
             ))}

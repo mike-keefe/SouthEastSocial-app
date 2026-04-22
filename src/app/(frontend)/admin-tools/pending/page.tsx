@@ -5,17 +5,13 @@ import configPromise from '@payload-config'
 import Link from 'next/link'
 import { PageWrapper } from '@/components/PageWrapper'
 import { ApproveButton } from './ApproveButton'
+import { formatEventDateTime } from '@/lib/dates'
 import type { Event, User } from '@/payload-types'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = { title: 'Pending events — SouthEastSocial Admin' }
 
-function formatDate(d: string) {
-  return new Date(d).toLocaleDateString('en-GB', {
-    day: 'numeric', month: 'short', year: 'numeric',
-    hour: '2-digit', minute: '2-digit',
-  })
-}
+const formatDate = formatEventDateTime
 
 export default async function PendingEventsPage() {
   const headers = await getHeaders()

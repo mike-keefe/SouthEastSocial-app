@@ -75,6 +75,7 @@ export interface Config {
     events: Event;
     follows: Follow;
     'email-logs': EmailLog;
+    neighbourhoods: Neighbourhood;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -90,6 +91,7 @@ export interface Config {
     events: EventsSelect<false> | EventsSelect<true>;
     follows: FollowsSelect<false> | FollowsSelect<true>;
     'email-logs': EmailLogsSelect<false> | EmailLogsSelect<true>;
+    neighbourhoods: NeighbourhoodsSelect<false> | NeighbourhoodsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -181,7 +183,7 @@ export interface User {
  */
 export interface Media {
   id: number;
-  alt: string;
+  alt?: string | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -259,8 +261,73 @@ export interface Venue {
   } | null;
   address?: string | null;
   postcode: string;
+  /**
+   * The area this venue belongs to. Used for area filtering and landing pages.
+   */
+  neighbourhood?: (number | null) | Neighbourhood;
   image?: (number | null) | Media;
   website?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * SE London areas used for filtering, search, and area landing pages.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "neighbourhoods".
+ */
+export interface Neighbourhood {
+  id: number;
+  name: string;
+  /**
+   * URL slug for the area page, e.g. "peckham" → /areas/peckham
+   */
+  slug: string;
+  /**
+   * SE postcode districts this area covers, e.g. SE15. Events and venues are matched by these.
+   */
+  postcodeDistricts: {
+    district: string;
+    id?: string | null;
+  }[];
+  /**
+   * Short one-liner shown under the area name, e.g. "Market stalls, record shops, and late nights."
+   */
+  tagline?: string | null;
+  /**
+   * Longer area guide — shown on the area landing page.
+   */
+  description?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  /**
+   * Hero image for the area landing page.
+   */
+  image?: (number | null) | Media;
+  /**
+   * Parent area for sub-neighbourhoods (e.g. Honor Oak → Forest Hill).
+   */
+  parent?: (number | null) | Neighbourhood;
+  /**
+   * Featured areas appear in the footer, homepage, and area filter.
+   */
+  featured?: boolean | null;
+  /**
+   * Lower numbers appear first in lists.
+   */
+  sortOrder?: number | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -434,6 +501,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'email-logs';
         value: number | EmailLog;
+      } | null)
+    | ({
+        relationTo: 'neighbourhoods';
+        value: number | Neighbourhood;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -574,6 +645,7 @@ export interface VenuesSelect<T extends boolean = true> {
   description?: T;
   address?: T;
   postcode?: T;
+  neighbourhood?: T;
   image?: T;
   website?: T;
   updatedAt?: T;
@@ -638,6 +710,28 @@ export interface EmailLogsSelect<T extends boolean = true> {
   subject?: T;
   status?: T;
   errorMessage?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "neighbourhoods_select".
+ */
+export interface NeighbourhoodsSelect<T extends boolean = true> {
+  name?: T;
+  slug?: T;
+  postcodeDistricts?:
+    | T
+    | {
+        district?: T;
+        id?: T;
+      };
+  tagline?: T;
+  description?: T;
+  image?: T;
+  parent?: T;
+  featured?: T;
+  sortOrder?: T;
   updatedAt?: T;
   createdAt?: T;
 }

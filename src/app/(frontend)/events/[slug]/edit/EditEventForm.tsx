@@ -4,27 +4,17 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { VenueSelector } from '@/components/VenueSelector'
-import type { Category, Event, Venue } from '@/payload-types'
+import { StyledSelect } from '@/components/StyledSelect'
+import { DateTimePicker } from '@/components/DateTimePicker'
+import { RichTextEditor } from '@/components/RichTextEditor'
+import { ImageUpload } from '@/components/ImageUpload'
+import { lexicalToHtml, htmlToLexical } from '@/lib/richtext'
+import type { Category, Event, Media, Venue } from '@/payload-types'
 
 type Props = {
   event: Event
   categories: Category[]
   venues: Venue[]
-}
-
-function extractText(content: unknown): string {
-  if (!content || typeof content !== 'object') return ''
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const root = (content as any).root
-  if (!root?.children) return ''
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return root.children.map((node: any) => {
-    if (node.type === 'paragraph') {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      return (node.children ?? []).map((c: any) => c.text ?? '').join('')
-    }
-    return ''
-  }).filter(Boolean).join('\n\n')
 }
 
 function toISO(dateStr: string | null | undefined): string {
@@ -39,30 +29,57 @@ export function EditEventForm({ event, categories, venues }: Props) {
   const initialVenueId =
     typeof event.venue === 'object' && event.venue
       ? String(event.venue.id)
-      : event.venue
-        ? String(event.venue)
-        : ''
+      : event.venue ? String(event.venue) : ''
   const initialCategoryId =
     typeof event.category === 'object' && event.category
       ? String(event.category.id)
-      : event.category
-        ? String(event.category)
-        : ''
+      : event.category ? String(event.category) : ''
+
+  const existingImage = typeof event.image === 'object' ? (event.image as Media) : null
+  const [imageId, setImageId] = useState<number | null>(
+    existingImage?.id ?? (typeof event.image === 'number' ? event.image : null)
+  )
+  const [imagePreview, setImagePreview] = useState<string | null>(existingImage?.url ?? null)
+  const [imageUploading, setImageUploading] = useState(false)
+
+  const [descHtml, setDescHtml] = useState(() => lexicalToHtml(event.description))
 
   const [form, setForm] = useState({
-    title:       event.title ?? '',
-    description: extractText(event.description),
-    category:    initialCategoryId,
-    venue:       initialVenueId,
-    postcode:    event.postcode ?? '',
-    startDate:   toISO(event.startDate),
-    endDate:     toISO(event.endDate),
-    price:       event.price ?? '',
-    ticketUrl:   event.ticketUrl ?? '',
+    title:     event.title ?? '',
+    category:  initialCategoryId,
+    venue:     initialVenueId,
+    postcode:  event.postcode ?? '',
+    startDate: toISO(event.startDate),
+    endDate:   toISO(event.endDate),
+    price:     event.price ?? '',
+    ticketUrl: event.ticketUrl ?? '',
   })
 
   function set(field: string, value: string) {
     setForm((prev) => ({ ...prev, [field]: value }))
+  }
+
+  async function handleImageFile(file: File) {
+    setImageUploading(true)
+    try {
+      const fd = new FormData()
+      fd.append('file', file)
+      fd.append('alt', form.title || event.title || file.name.replace(/\.[^.]+$/, ''))
+      const res = await fetch('/api/media', { method: 'POST', body: fd })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data?.errors?.[0]?.message ?? 'Upload failed')
+      setImageId(data.doc.id)
+      setImagePreview(URL.createObjectURL(file))
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Image upload failed')
+    } finally {
+      setImageUploading(false)
+    }
+  }
+
+  function clearImage() {
+    setImageId(null)
+    setImagePreview(null)
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -71,27 +88,8 @@ export function EditEventForm({ event, categories, venues }: Props) {
 
     try {
       const body: Record<string, unknown> = {
-        title: form.title,
-        description: {
-          root: {
-            type: 'root',
-            children: form.description
-              .split('\n\n')
-              .filter(Boolean)
-              .map((para) => ({
-                type: 'paragraph',
-                version: 1,
-                children: [{ type: 'text', text: para.trim(), version: 1 }],
-                direction: 'ltr',
-                format: '',
-                indent: 0,
-              })),
-            direction: 'ltr',
-            format: '',
-            indent: 0,
-            version: 1,
-          },
-        },
+        title:     form.title,
+        description: htmlToLexical(descHtml),
         postcode:  form.postcode,
         startDate: form.startDate,
         price:     form.price,
@@ -99,6 +97,7 @@ export function EditEventForm({ event, categories, venues }: Props) {
         endDate:   form.endDate || null,
         category:  form.category ? Number(form.category) : null,
         venue:     form.venue    ? Number(form.venue)    : null,
+        image:     imageId ?? null,
       }
 
       const res = await fetch(`/api/events/${event.id}`, {
@@ -110,8 +109,7 @@ export function EditEventForm({ event, categories, venues }: Props) {
       const data = await res.json()
 
       if (!res.ok) {
-        const message = data?.errors?.[0]?.message ?? 'Could not save event'
-        toast.error(message)
+        toast.error(data?.errors?.[0]?.message ?? 'Could not save event')
         return
       }
 
@@ -151,34 +149,38 @@ export function EditEventForm({ event, categories, venues }: Props) {
         </div>
 
         <div>
-          <label htmlFor="description" className={labelCls}>
+          <span className={labelCls}>
             Description <span className="text-primary-400">*</span>
-          </label>
-          <textarea
-            id="description"
-            required
-            value={form.description}
-            onChange={(e) => set('description', e.target.value)}
-            rows={6}
-            className="w-full px-4 py-3 border border-neutral-700 bg-neutral-800 text-white text-sm placeholder:text-neutral-600 focus:outline-none focus:ring-2 focus:ring-primary-400 resize-y transition-colors"
+          </span>
+          <RichTextEditor
+            value={descHtml}
+            onChange={setDescHtml}
+            placeholder="Tell people what to expect…"
           />
         </div>
 
         <div>
           <label htmlFor="category" className={labelCls}>Category</label>
-          <select
+          <StyledSelect
             id="category"
             value={form.category}
             onChange={(e) => set('category', e.target.value)}
-            className={inputCls}
           >
             <option value="">No category</option>
             {categories.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.name}
-              </option>
+              <option key={c.id} value={c.id}>{c.name}</option>
             ))}
-          </select>
+          </StyledSelect>
+        </div>
+
+        <div>
+          <span className={labelCls}>Event image</span>
+          <ImageUpload
+            imagePreview={imagePreview}
+            uploading={imageUploading}
+            onFile={handleImageFile}
+            onClear={clearImage}
+          />
         </div>
       </fieldset>
 
@@ -190,24 +192,20 @@ export function EditEventForm({ event, categories, venues }: Props) {
             <label htmlFor="startDate" className={labelCls}>
               Start <span className="text-primary-400">*</span>
             </label>
-            <input
+            <DateTimePicker
               id="startDate"
-              type="datetime-local"
               required
               value={form.startDate}
-              onChange={(e) => set('startDate', e.target.value)}
-              className={inputCls}
+              onChange={(v) => set('startDate', v)}
             />
           </div>
           <div>
             <label htmlFor="endDate" className={labelCls}>End</label>
-            <input
+            <DateTimePicker
               id="endDate"
-              type="datetime-local"
               min={form.startDate}
               value={form.endDate}
-              onChange={(e) => set('endDate', e.target.value)}
-              className={inputCls}
+              onChange={(v) => set('endDate', v)}
             />
           </div>
         </div>
@@ -216,25 +214,31 @@ export function EditEventForm({ event, categories, venues }: Props) {
       <fieldset className="space-y-5">
         <p className={sectionHeadingCls}>Location</p>
 
-        <div>
-          <label htmlFor="postcode" className={labelCls}>
-            Postcode <span className="text-primary-400">*</span>
-          </label>
-          <input
-            id="postcode"
-            type="text"
-            required
-            value={form.postcode}
-            onChange={(e) => set('postcode', e.target.value)}
-            className={`${inputCls} max-w-xs`}
-            placeholder="e.g. SE15 4NX"
-          />
-        </div>
-
         {venues.length > 0 && (
           <div>
             <label className={labelCls}>Venue</label>
             <VenueSelector venues={venues} value={form.venue} onChange={(id) => set('venue', id)} />
+          </div>
+        )}
+
+        {form.venue ? (
+          <p className="text-xs text-neutral-600">
+            Location will be taken from the selected venue.
+          </p>
+        ) : (
+          <div>
+            <label htmlFor="postcode" className={labelCls}>
+              Postcode <span className="text-primary-400">*</span>
+            </label>
+            <input
+              id="postcode"
+              type="text"
+              required
+              value={form.postcode}
+              onChange={(e) => set('postcode', e.target.value)}
+              className={`${inputCls} max-w-xs`}
+              placeholder="e.g. SE15 4NX"
+            />
           </div>
         )}
       </fieldset>
@@ -271,7 +275,7 @@ export function EditEventForm({ event, categories, venues }: Props) {
       <div className="pt-2">
         <button
           type="submit"
-          disabled={loading}
+          disabled={loading || imageUploading}
           className="w-full py-3.5 bg-primary-400 hover:bg-primary-300 disabled:opacity-40 text-black font-bold text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-primary-400"
         >
           {loading ? 'Saving…' : 'Save changes'}

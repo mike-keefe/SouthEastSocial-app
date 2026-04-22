@@ -18,19 +18,19 @@
 // ---------------------------------------------------------------------------
 
 export const colors = {
-  // Primary — brick orange-red, inspired by SE London railway arches and market stalls
+  // Primary — electric lime green, the site's brand colour
   primary: {
-    50: '#fff4ed',
-    100: '#ffe6d5',
-    200: '#fecba8',
-    300: '#fda470',
-    400: '#fb7236',
-    500: '#f95016', // brand orange — main CTA, links, highlights
-    600: '#ea3410',
-    700: '#c22410',
-    800: '#9a1f14',
-    900: '#7c1d13',
-    950: '#430b07',
+    50:  '#f4ffe0',
+    100: '#e5ffad',
+    200: '#d0ff70',
+    300: '#c0ff40',
+    400: '#b0ff00',
+    500: '#8fcc00', // brand green — main CTA, links, highlights
+    600: '#6fa000',
+    700: '#527500',
+    800: '#394f00',
+    900: '#253300',
+    950: '#131c00',
   },
 
   // Secondary — Thames steel blue, used for information states and secondary actions
@@ -63,19 +63,19 @@ export const colors = {
     950: '#422006',
   },
 
-  // Neutral — warm off-white to near-black; warmer than pure grey
+  // Neutral — cool grey scale matching the site's Tailwind config
   neutral: {
-    50: '#faf9f7',  // page background
-    100: '#f0ede8',
-    200: '#e2ddd5',
-    300: '#cec6bb',
-    400: '#b5a99a',
-    500: '#9e8f7e',
-    600: '#8a7a6b',
-    700: '#726358',
-    800: '#5f524a',
-    900: '#4e443d',
-    950: '#1a1614',  // near-black for body text
+    50:  '#f5f5f5',  // page background
+    100: '#ebebeb',
+    200: '#d6d6d6',
+    300: '#b5b5b5',
+    400: '#898989',
+    500: '#636363',
+    600: '#4a4a4a',
+    700: '#3a3a42',
+    800: '#2a2a30',
+    900: '#1e1e24',
+    950: '#141418',  // near-black for body text
   },
 
   // Semantic — feedback colours

@@ -5,6 +5,7 @@ import { getPayload } from 'payload'
 import configPromise from '@payload-config'
 import { PageWrapper } from '@/components/PageWrapper'
 import { UnfollowButton } from './UnfollowButton'
+import { formatEventDateShort } from '@/lib/dates'
 import type { Event, Follow, Venue, Organiser } from '@/payload-types'
 import type { Metadata } from 'next'
 
@@ -19,11 +20,7 @@ const statusConfig: Record<string, { label: string; cls: string }> = {
   draft:     { label: 'Draft',     cls: 'text-neutral-400 border border-neutral-700' },
 }
 
-function formatDate(d: string) {
-  return new Date(d).toLocaleDateString('en-GB', {
-    day: 'numeric', month: 'short', year: 'numeric',
-  })
-}
+const formatDate = formatEventDateShort
 
 export default async function AccountPage() {
   const headers = await getHeaders()

@@ -8,6 +8,7 @@ import { PageWrapper } from '@/components/PageWrapper'
 import { CategoryPill } from '@/components/CategoryPill'
 import { EventCard } from '@/components/EventCard'
 import { RichText } from '@/components/RichText'
+import { formatEventDateTime } from '@/lib/dates'
 import { MapEmbed } from '@/components/MapEmbed'
 import type { Event, Category, Venue, Organiser, Media, User } from '@/payload-types'
 import type { Metadata } from 'next'
@@ -58,16 +59,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 }
 
-function formatDateTime(dateString: string): string {
-  return new Date(dateString).toLocaleDateString('en-GB', {
-    weekday: 'long',
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  })
-}
+const formatDateTime = formatEventDateTime
 
 export default async function EventDetailPage({ params }: Props) {
   const { slug } = await params
