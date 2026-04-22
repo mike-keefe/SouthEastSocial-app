@@ -4,28 +4,61 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { VenueSelector } from '@/components/VenueSelector'
-import type { Category, Venue } from '@/payload-types'
+import type { Category, Event, Venue } from '@/payload-types'
 
 type Props = {
+  event: Event
   categories: Category[]
   venues: Venue[]
 }
 
-const minDateTime = () => new Date(Date.now() - 60_000).toISOString().slice(0, 16)
+function extractText(content: unknown): string {
+  if (!content || typeof content !== 'object') return ''
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const root = (content as any).root
+  if (!root?.children) return ''
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return root.children.map((node: any) => {
+    if (node.type === 'paragraph') {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      return (node.children ?? []).map((c: any) => c.text ?? '').join('')
+    }
+    return ''
+  }).filter(Boolean).join('\n\n')
+}
 
-export function SubmitEventForm({ categories, venues }: Props) {
+function toISO(dateStr: string | null | undefined): string {
+  if (!dateStr) return ''
+  return new Date(dateStr).toISOString().slice(0, 16)
+}
+
+export function EditEventForm({ event, categories, venues }: Props) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
+
+  const initialVenueId =
+    typeof event.venue === 'object' && event.venue
+      ? String(event.venue.id)
+      : event.venue
+        ? String(event.venue)
+        : ''
+  const initialCategoryId =
+    typeof event.category === 'object' && event.category
+      ? String(event.category.id)
+      : event.category
+        ? String(event.category)
+        : ''
+
   const [form, setForm] = useState({
-    title: '',
-    description: '',
-    category: '',
-    venue: '',
-    postcode: '',
-    startDate: '',
-    endDate: '',
-    price: '',
-    ticketUrl: '',
+    title:       event.title ?? '',
+    description: extractText(event.description),
+    category:    initialCategoryId,
+    venue:       initialVenueId,
+    postcode:    event.postcode ?? '',
+    startDate:   toISO(event.startDate),
+    endDate:     toISO(event.endDate),
+    price:       event.price ?? '',
+    ticketUrl:   event.ticketUrl ?? '',
   })
 
   function set(field: string, value: string) {
@@ -59,17 +92,17 @@ export function SubmitEventForm({ categories, venues }: Props) {
             version: 1,
           },
         },
-        postcode: form.postcode,
+        postcode:  form.postcode,
         startDate: form.startDate,
-        price: form.price,
+        price:     form.price,
         ticketUrl: form.ticketUrl,
+        endDate:   form.endDate || null,
+        category:  form.category ? Number(form.category) : null,
+        venue:     form.venue    ? Number(form.venue)    : null,
       }
-      if (form.category) body.category = Number(form.category)
-      if (form.venue)    body.venue    = Number(form.venue)
-      if (form.endDate)  body.endDate  = form.endDate
 
-      const res = await fetch('/api/events', {
-        method: 'POST',
+      const res = await fetch(`/api/events/${event.id}`, {
+        method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
       })
@@ -77,13 +110,14 @@ export function SubmitEventForm({ categories, venues }: Props) {
       const data = await res.json()
 
       if (!res.ok) {
-        const message = data?.errors?.[0]?.message ?? 'Could not submit event'
+        const message = data?.errors?.[0]?.message ?? 'Could not save event'
         toast.error(message)
         return
       }
 
-      toast.success("Event submitted! We'll review it shortly.")
-      router.push('/account')
+      toast.success('Event updated.')
+      router.push(`/events/${event.slug}`)
+      router.refresh()
     } catch {
       toast.error('Something went wrong. Please try again.')
     } finally {
@@ -99,7 +133,6 @@ export function SubmitEventForm({ categories, venues }: Props) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-8">
-      {/* Event details */}
       <fieldset className="space-y-5">
         <p className={sectionHeadingCls}>Event details</p>
 
@@ -114,7 +147,6 @@ export function SubmitEventForm({ categories, venues }: Props) {
             value={form.title}
             onChange={(e) => set('title', e.target.value)}
             className={inputCls}
-            placeholder="e.g. Peckham Night Market"
           />
         </div>
 
@@ -129,7 +161,6 @@ export function SubmitEventForm({ categories, venues }: Props) {
             onChange={(e) => set('description', e.target.value)}
             rows={6}
             className="w-full px-4 py-3 border border-neutral-700 bg-neutral-800 text-white text-sm placeholder:text-neutral-600 focus:outline-none focus:ring-2 focus:ring-primary-400 resize-y transition-colors"
-            placeholder="Tell people what to expect. Separate paragraphs with a blank line."
           />
         </div>
 
@@ -141,7 +172,7 @@ export function SubmitEventForm({ categories, venues }: Props) {
             onChange={(e) => set('category', e.target.value)}
             className={inputCls}
           >
-            <option value="">Select a category</option>
+            <option value="">No category</option>
             {categories.map((c) => (
               <option key={c.id} value={c.id}>
                 {c.name}
@@ -151,7 +182,6 @@ export function SubmitEventForm({ categories, venues }: Props) {
         </div>
       </fieldset>
 
-      {/* Date & time */}
       <fieldset className="space-y-5">
         <p className={sectionHeadingCls}>Date &amp; time</p>
 
@@ -164,7 +194,6 @@ export function SubmitEventForm({ categories, venues }: Props) {
               id="startDate"
               type="datetime-local"
               required
-              min={minDateTime()}
               value={form.startDate}
               onChange={(e) => set('startDate', e.target.value)}
               className={inputCls}
@@ -175,7 +204,7 @@ export function SubmitEventForm({ categories, venues }: Props) {
             <input
               id="endDate"
               type="datetime-local"
-              min={form.startDate || minDateTime()}
+              min={form.startDate}
               value={form.endDate}
               onChange={(e) => set('endDate', e.target.value)}
               className={inputCls}
@@ -184,7 +213,6 @@ export function SubmitEventForm({ categories, venues }: Props) {
         </div>
       </fieldset>
 
-      {/* Location */}
       <fieldset className="space-y-5">
         <p className={sectionHeadingCls}>Location</p>
 
@@ -201,22 +229,16 @@ export function SubmitEventForm({ categories, venues }: Props) {
             className={`${inputCls} max-w-xs`}
             placeholder="e.g. SE15 4NX"
           />
-          <p className="text-xs text-neutral-600 mt-1.5">Must be an SE postcode</p>
         </div>
 
         {venues.length > 0 && (
           <div>
             <label className={labelCls}>Venue</label>
-            <VenueSelector
-              venues={venues}
-              value={form.venue}
-              onChange={(id) => set('venue', id)}
-            />
+            <VenueSelector venues={venues} value={form.venue} onChange={(id) => set('venue', id)} />
           </div>
         )}
       </fieldset>
 
-      {/* Tickets */}
       <fieldset className="space-y-5">
         <p className={sectionHeadingCls}>Tickets &amp; info</p>
 
@@ -252,7 +274,7 @@ export function SubmitEventForm({ categories, venues }: Props) {
           disabled={loading}
           className="w-full py-3.5 bg-primary-400 hover:bg-primary-300 disabled:opacity-40 text-black font-bold text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-primary-400"
         >
-          {loading ? 'Submitting…' : 'Submit event for review'}
+          {loading ? 'Saving…' : 'Save changes'}
         </button>
       </div>
     </form>

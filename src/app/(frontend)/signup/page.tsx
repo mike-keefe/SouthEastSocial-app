@@ -32,7 +32,6 @@ export default function SignupPage() {
         return
       }
 
-      // Auto-login after signup
       const loginRes = await fetch('/api/users/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -54,23 +53,30 @@ export default function SignupPage() {
     }
   }
 
-  return (
-    <div className="py-16">
-      <PageWrapper narrow>
-        <div className="max-w-md mx-auto">
-          <h1 className="font-display text-4xl font-bold text-neutral-950 mb-2">Create account</h1>
-          <p className="text-neutral-500 mb-8">
-            Already have one?{' '}
-            <Link href="/login" className="text-primary-600 hover:underline font-medium">
-              Log in
-            </Link>
-          </p>
+  const inputCls =
+    'w-full h-11 px-4 border border-neutral-700 bg-neutral-800 text-white text-sm placeholder:text-neutral-600 focus:outline-none focus:ring-2 focus:ring-primary-400 transition-colors'
+  const labelCls = 'block text-[9px] font-bold uppercase tracking-[0.15em] text-neutral-500 mb-1.5'
 
-          <form onSubmit={handleSubmit} className="space-y-5">
+  return (
+    <div className="bg-neutral-950 min-h-screen flex items-center">
+      <PageWrapper narrow>
+        <div className="max-w-sm mx-auto py-16">
+          <div className="mb-10">
+            <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-neutral-600 mb-3">
+              SouthEastSocial
+            </p>
+            <h1 className="font-display font-bold text-3xl text-white">Create account</h1>
+            <p className="text-neutral-500 text-sm mt-2">
+              Already have one?{' '}
+              <Link href="/login" className="text-primary-400 hover:text-primary-300 transition-colors">
+                Log in
+              </Link>
+            </p>
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label htmlFor="displayName" className="block text-sm font-medium text-neutral-700 mb-1">
-                Display name
-              </label>
+              <label htmlFor="displayName" className={labelCls}>Display name</label>
               <input
                 id="displayName"
                 type="text"
@@ -78,15 +84,13 @@ export default function SignupPage() {
                 required
                 value={displayName}
                 onChange={(e) => setDisplayName(e.target.value)}
-                className="w-full h-11 px-4 rounded-xl border border-neutral-300 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white"
+                className={inputCls}
                 placeholder="Your public name"
               />
             </div>
 
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-neutral-700 mb-1">
-                Email address
-              </label>
+              <label htmlFor="email" className={labelCls}>Email address</label>
               <input
                 id="email"
                 type="email"
@@ -94,15 +98,13 @@ export default function SignupPage() {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full h-11 px-4 rounded-xl border border-neutral-300 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white"
+                className={inputCls}
                 placeholder="you@example.com"
               />
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-neutral-700 mb-1">
-                Password
-              </label>
+              <label htmlFor="password" className={labelCls}>Password</label>
               <input
                 id="password"
                 type="password"
@@ -111,18 +113,20 @@ export default function SignupPage() {
                 minLength={8}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full h-11 px-4 rounded-xl border border-neutral-300 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white"
+                className={inputCls}
                 placeholder="At least 8 characters"
               />
             </div>
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full h-11 bg-primary-500 hover:bg-primary-600 disabled:opacity-50 text-white font-semibold rounded-xl transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
-            >
-              {loading ? 'Creating account…' : 'Create account'}
-            </button>
+            <div className="pt-2">
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full h-11 bg-primary-400 hover:bg-primary-300 disabled:opacity-40 text-black font-bold text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-primary-400"
+              >
+                {loading ? 'Creating account…' : 'Create account'}
+              </button>
+            </div>
           </form>
         </div>
       </PageWrapper>

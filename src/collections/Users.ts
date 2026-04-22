@@ -30,7 +30,6 @@ export const Users: CollectionConfig = {
       ],
       defaultValue: 'member',
       required: true,
-      // Saves role into JWT so access control functions can read it without a DB lookup
       saveToJWT: true,
       access: {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -51,21 +50,47 @@ export const Users: CollectionConfig = {
       type: 'upload',
       relationTo: 'media',
     },
+    {
+      name: 'emailPreferences',
+      type: 'group',
+      label: 'Email Preferences',
+      admin: { description: 'Which emails this user receives.' },
+      fields: [
+        {
+          name: 'weeklyDigest',
+          type: 'checkbox',
+          defaultValue: true,
+          admin: { description: 'Receive weekly event digest emails' },
+        },
+        {
+          name: 'eventApproved',
+          type: 'checkbox',
+          defaultValue: true,
+          admin: { description: 'Receive an email when a submitted event is approved' },
+        },
+        {
+          name: 'welcomeEmail',
+          type: 'checkbox',
+          defaultValue: true,
+          admin: { description: 'Receive a welcome email on sign-up' },
+        },
+      ],
+    },
   ],
   hooks: {
     beforeDelete: [
       async ({ id, req }) => {
-        // Delete child records with NOT NULL user FK before the user row is removed,
-        // otherwise Postgres rejects the delete due to the constraint.
         await Promise.allSettled([
-          req.payload.delete({
-            collection: 'email-subscriptions',
-            where: { user: { equals: id } },
-            req,
-          }),
           req.payload.delete({
             collection: 'follows',
             where: { user: { equals: id } },
+            req,
+          }),
+          // Null out linkedUser on any Organiser pointing to this user
+          req.payload.update({
+            collection: 'organisers',
+            where: { linkedUser: { equals: id } },
+            data: { linkedUser: null },
             req,
           }),
         ])
@@ -74,18 +99,6 @@ export const Users: CollectionConfig = {
     afterChange: [
       async ({ doc, operation, req }) => {
         if (operation !== 'create') return doc
-
-        // Auto-create an EmailSubscriptions record for every new user.
-        // Wrapped in try/catch so a failure doesn't break registration.
-        try {
-          await req.payload.create({
-            collection: 'email-subscriptions',
-            data: { user: doc.id },
-            req,
-          })
-        } catch (err) {
-          console.error('[Users] Failed to create EmailSubscriptions record:', err)
-        }
 
         try {
           const html = await render(WelcomeEmail({ displayName: doc.displayName }))

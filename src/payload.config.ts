@@ -13,7 +13,6 @@ import { Venues } from './collections/Venues'
 import { Organisers } from './collections/Organisers'
 import { Events } from './collections/Events'
 import { Follows } from './collections/Follows'
-import { EmailSubscriptions } from './collections/EmailSubscriptions'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -28,7 +27,7 @@ export default buildConfig({
       titleSuffix: '— SouthEastSocial Admin',
     },
   },
-  collections: [Users, Media, Categories, Venues, Organisers, Events, Follows, EmailSubscriptions],
+  collections: [Users, Media, Categories, Venues, Organisers, Events, Follows],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',
   typescript: {

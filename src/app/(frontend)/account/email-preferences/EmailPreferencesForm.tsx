@@ -2,9 +2,13 @@
 
 import { useState } from 'react'
 import { toast } from 'sonner'
-import type { EmailSubscription } from '@/payload-types'
 
-type Props = { prefs: EmailSubscription }
+type Props = {
+  userId: number
+  weeklyDigest: boolean
+  eventApproved: boolean
+  welcomeEmail: boolean
+}
 
 type Prefs = {
   weeklyDigest: boolean
@@ -16,12 +20,13 @@ const PREF_LABELS: { key: keyof Prefs; label: string; description: string }[] = 
   {
     key: 'weeklyDigest',
     label: 'Weekly digest',
-    description: 'A curated list of upcoming events, including personalised picks from venues and organisers you follow.',
+    description:
+      'A curated list of upcoming events, including personalised picks from venues and organisers you follow.',
   },
   {
     key: 'eventApproved',
     label: 'Event approved',
-    description: "An email when one of your submitted events is approved and goes live.",
+    description: 'An email when one of your submitted events is approved and goes live.',
   },
   {
     key: 'welcomeEmail',
@@ -30,21 +35,17 @@ const PREF_LABELS: { key: keyof Prefs; label: string; description: string }[] = 
   },
 ]
 
-export function EmailPreferencesForm({ prefs }: Props) {
-  const [values, setValues] = useState<Prefs>({
-    weeklyDigest: prefs.weeklyDigest ?? true,
-    eventApproved: prefs.eventApproved ?? true,
-    welcomeEmail: prefs.welcomeEmail ?? true,
-  })
+export function EmailPreferencesForm({ userId, weeklyDigest, eventApproved, welcomeEmail }: Props) {
+  const [values, setValues] = useState<Prefs>({ weeklyDigest, eventApproved, welcomeEmail })
   const [loading, setLoading] = useState(false)
 
   async function handleSave() {
     setLoading(true)
     try {
-      const res = await fetch(`/api/email-subscriptions/${prefs.id}`, {
+      const res = await fetch(`/api/users/${userId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(values),
+        body: JSON.stringify({ emailPreferences: values }),
       })
       if (!res.ok) throw new Error()
       toast.success('Preferences saved')
@@ -56,30 +57,32 @@ export function EmailPreferencesForm({ prefs }: Props) {
   }
 
   return (
-    <div className="bg-white rounded-2xl border border-neutral-200 p-6 sm:p-8 space-y-6">
-      {PREF_LABELS.map(({ key, label, description }) => (
-        <label key={key} className="flex items-start gap-4 cursor-pointer group">
-          <div className="relative mt-0.5">
-            <input
-              type="checkbox"
-              className="sr-only peer"
-              checked={values[key]}
-              onChange={(e) => setValues((prev) => ({ ...prev, [key]: e.target.checked }))}
-            />
-            <div className="w-11 h-6 rounded-full bg-neutral-200 peer-checked:bg-primary-500 transition-colors peer-focus-visible:ring-2 peer-focus-visible:ring-primary-500 peer-focus-visible:ring-offset-2" />
-            <div className="absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow-sm transition-transform peer-checked:translate-x-5" />
-          </div>
-          <div>
-            <p className="font-semibold text-neutral-900 group-hover:text-neutral-700">{label}</p>
-            <p className="text-sm text-neutral-500 mt-0.5">{description}</p>
-          </div>
-        </label>
-      ))}
+    <div className="space-y-3">
+      <div className="bg-neutral-900 border border-neutral-800 divide-y divide-neutral-800">
+        {PREF_LABELS.map(({ key, label, description }) => (
+          <label key={key} className="flex items-start gap-5 cursor-pointer group p-5">
+            <div className="relative mt-0.5 shrink-0">
+              <input
+                type="checkbox"
+                className="sr-only peer"
+                checked={values[key]}
+                onChange={(e) => setValues((prev) => ({ ...prev, [key]: e.target.checked }))}
+              />
+              <div className="w-10 h-6 bg-neutral-700 peer-checked:bg-primary-400 transition-colors peer-focus-visible:ring-2 peer-focus-visible:ring-primary-400 peer-focus-visible:ring-offset-2 peer-focus-visible:ring-offset-neutral-950" />
+              <div className="absolute top-0.5 left-0.5 w-5 h-5 bg-white shadow-sm transition-transform peer-checked:translate-x-4" />
+            </div>
+            <div>
+              <p className="font-semibold text-white text-sm">{label}</p>
+              <p className="text-sm text-neutral-500 mt-0.5 leading-relaxed">{description}</p>
+            </div>
+          </label>
+        ))}
+      </div>
 
       <button
         onClick={handleSave}
         disabled={loading}
-        className="mt-2 bg-primary-500 hover:bg-primary-600 disabled:opacity-50 text-white font-semibold px-6 py-2.5 rounded-xl transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
+        className="w-full py-3 bg-primary-400 hover:bg-primary-300 disabled:opacity-40 text-black font-bold text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-primary-400"
       >
         {loading ? 'Saving…' : 'Save preferences'}
       </button>

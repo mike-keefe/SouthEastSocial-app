@@ -69,10 +69,30 @@ export const Follows: CollectionConfig = {
   ],
   hooks: {
     beforeChange: [
-      ({ data, operation, req }) => {
-        // Auto-set user to the current authenticated user on create
+      async ({ data, operation, req }) => {
         if (operation === 'create' && req.user) {
           data.user = req.user.id
+
+          // Prevent duplicate follows for the same (user, followType, target)
+          const targetField = data.followType === 'venue' ? 'venue' : 'organiser'
+          const targetId = data[targetField]
+          if (targetId) {
+            const existing = await req.payload.find({
+              collection: 'follows',
+              where: {
+                and: [
+                  { user: { equals: req.user.id } },
+                  { followType: { equals: data.followType } },
+                  { [targetField]: { equals: targetId } },
+                ],
+              },
+              limit: 1,
+              overrideAccess: true,
+            })
+            if (existing.totalDocs > 0) {
+              throw new Error('You are already following this.')
+            }
+          }
         }
         return data
       },

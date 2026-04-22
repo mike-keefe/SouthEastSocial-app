@@ -23,7 +23,7 @@ export const metadata: Metadata = {
 
 export const revalidate = 300
 
-async function getFeaturedEvents(): Promise<Event[]> {
+async function getUpcomingEvents(): Promise<Event[]> {
   const payload = await getPayload({ config: configPromise })
   const { docs } = await payload.find({
     collection: 'events',
@@ -34,124 +34,110 @@ async function getFeaturedEvents(): Promise<Event[]> {
       ],
     },
     sort: 'startDate',
-    limit: 6,
+    limit: 8,
     depth: 2,
   })
   return docs as Event[]
 }
 
-const NEIGHBOURHOODS: { label: string; postcode: string }[] = [
-  { label: 'Peckham', postcode: 'SE15' },
-  { label: 'Deptford', postcode: 'SE8' },
-  { label: 'New Cross', postcode: 'SE14' },
-  { label: 'Bermondsey', postcode: 'SE1' },
-  { label: 'Camberwell', postcode: 'SE5' },
-  { label: 'Lewisham', postcode: 'SE13' },
+const NEIGHBOURHOODS = [
+  { label: 'Peckham',    postcode: 'SE15' },
+  { label: 'Deptford',   postcode: 'SE8'  },
+  { label: 'New Cross',  postcode: 'SE14' },
+  { label: 'Bermondsey', postcode: 'SE1'  },
+  { label: 'Camberwell', postcode: 'SE5'  },
+  { label: 'Lewisham',   postcode: 'SE13' },
 ]
 
+function formatTickerDate(iso: string) {
+  return new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }).toUpperCase()
+}
+
 export default async function HomePage() {
-  const events = await getFeaturedEvents()
+  const events = await getUpcomingEvents()
 
   return (
     <>
-      {/* Hero */}
-      <section className="relative bg-neutral-950 text-white overflow-hidden">
-        {/* Dot-grid background */}
+      {/* ─── HERO ─────────────────────────────────────────────────── */}
+      <section className="relative bg-neutral-950 overflow-hidden">
+        {/* Ruled-line background */}
         <div
           className="absolute inset-0 pointer-events-none"
           aria-hidden="true"
           style={{
-            backgroundImage:
-              'radial-gradient(circle, rgba(255,255,255,0.055) 1px, transparent 1px)',
-            backgroundSize: '28px 28px',
-          }}
-        />
-        {/* Vignette — fades dot grid toward edges */}
-        <div
-          className="absolute inset-0 pointer-events-none"
-          aria-hidden="true"
-          style={{
-            background:
-              'radial-gradient(ellipse 100% 80% at 50% 50%, transparent 30%, #09090b 100%)',
+            backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 47px, rgba(255,255,255,0.025) 47px, rgba(255,255,255,0.025) 48px)',
           }}
         />
 
         <PageWrapper>
-          <div className="relative py-16 sm:py-24 lg:py-28">
+          <div className="relative pt-16 pb-0 sm:pt-20 lg:pt-24">
             {/* Eyebrow */}
-            <p className="font-display text-[10px] font-medium tracking-[0.35em] uppercase text-neutral-600 mb-10">
-              SE London&nbsp; //&nbsp; Community Events
-            </p>
+            <div className="flex items-center gap-3 mb-10">
+              <div className="w-5 h-px bg-primary-400" />
+              <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-neutral-500">
+                SE London &mdash; Community Events
+              </span>
+            </div>
 
-            {/* Stacked headline in Geist Mono */}
-            <h1
-              className="font-display font-bold leading-[0.87] mb-10"
-              aria-label="What's on in SE London"
-            >
+            {/* Headline — fills container width */}
+            <h1 className="font-display font-bold leading-[0.88] mb-10">
               <span
                 className="block text-white"
-                style={{ fontSize: 'clamp(3.2rem, 9.5vw, 7rem)' }}
+                style={{ fontSize: 'clamp(3.8rem, 12.5vw, 9rem)' }}
               >
                 What&apos;s
               </span>
               <span
                 className="block text-primary-400"
-                style={{ fontSize: 'clamp(3.2rem, 9.5vw, 7rem)' }}
+                style={{ fontSize: 'clamp(3.8rem, 12.5vw, 9rem)' }}
               >
-                on —
-              </span>
-              <span
-                className="block text-neutral-600"
-                style={{ fontSize: 'clamp(1.9rem, 5.5vw, 4.2rem)' }}
-              >
-                SE London.
+                on.
               </span>
             </h1>
 
-            {/* Divider + tagline */}
-            <div className="flex items-center gap-4 mb-8">
-              <div className="h-px w-8 bg-primary-500 shrink-0" />
-              <p className="text-neutral-400 text-sm">
-                Gigs, markets, community nights, and culture — from Peckham to Bermondsey.
+            {/* Rule + descriptor */}
+            <div className="border-t border-neutral-800 pt-6 mb-8 max-w-xl">
+              <p className="text-neutral-400 text-[13px] leading-relaxed">
+                Gigs, markets, community nights, talks, and culture — from Peckham to Bermondsey.
               </p>
             </div>
 
             {/* Search form */}
-            <form action="/events" method="GET" className="max-w-xl mb-6">
-              <div className="flex flex-col sm:flex-row gap-2">
+            <form action="/events" method="GET" className="max-w-xl mb-8">
+              <div className="flex flex-col sm:flex-row gap-0 border border-neutral-700 focus-within:border-primary-400 transition-colors">
                 <input
                   name="q"
                   type="text"
-                  placeholder="Search events, venues…"
+                  placeholder="Search events or venues"
                   aria-label="Search events by keyword"
-                  className="flex-1 h-11 px-4 bg-neutral-900 border border-neutral-700 rounded text-white placeholder:text-neutral-600 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                  className="flex-1 h-12 px-4 bg-neutral-900 text-white placeholder:text-neutral-600 text-sm focus:outline-none border-b sm:border-b-0 sm:border-r border-neutral-700"
                 />
                 <input
                   name="postcode"
                   type="text"
-                  placeholder="SE postcode"
+                  placeholder="Postcode"
                   aria-label="Filter by SE postcode"
-                  className="w-full sm:w-32 h-11 px-4 bg-neutral-900 border border-neutral-700 rounded text-white placeholder:text-neutral-600 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all uppercase"
+                  className="w-full sm:w-28 h-12 px-4 bg-neutral-900 text-white placeholder:text-neutral-600 text-sm focus:outline-none uppercase"
                 />
                 <button
                   type="submit"
-                  className="h-11 px-6 bg-primary-600 hover:bg-primary-500 text-white font-bold text-sm rounded transition-colors whitespace-nowrap focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 focus:ring-offset-neutral-950"
+                  className="h-12 px-6 bg-primary-400 hover:bg-primary-300 text-black font-bold text-sm transition-colors whitespace-nowrap focus:outline-none focus:ring-2 focus:ring-primary-400 focus:ring-inset shrink-0"
                 >
                   Search
                 </button>
               </div>
             </form>
 
-            {/* Neighbourhood chips */}
-            <div className="flex items-center flex-wrap gap-2">
-              <span className="text-neutral-700 text-[10px] uppercase tracking-[0.22em] font-bold mr-1">
-                Browse
+            {/* Neighbourhood row */}
+            <div className="flex items-center flex-wrap gap-x-0 gap-y-0 pb-16 -mx-1">
+              <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-neutral-600 px-1 mr-2">
+                Areas
               </span>
               {NEIGHBOURHOODS.map(({ label, postcode }) => (
                 <Link
                   key={label}
                   href={`/events?postcode=${encodeURIComponent(postcode)}`}
-                  className="text-xs text-neutral-500 hover:text-white border border-neutral-800 hover:border-neutral-600 px-2.5 py-1 rounded transition-all hover:bg-neutral-900"
+                  className="text-[12px] text-neutral-500 hover:text-white hover:bg-neutral-800 px-3 py-1.5 transition-colors border-l border-neutral-800 first-of-type:border-l-0 focus:outline-none focus:ring-2 focus:ring-primary-400"
                 >
                   {label}
                 </Link>
@@ -161,65 +147,118 @@ export default async function HomePage() {
         </PageWrapper>
       </section>
 
-      {/* Featured events */}
-      <section className="py-14 sm:py-16 bg-neutral-50 dark:bg-neutral-950 border-t border-neutral-100 dark:border-neutral-800">
+      {/* ─── TICKER ───────────────────────────────────────────────── */}
+      {events.length > 0 && (
+        <div className="bg-primary-400 overflow-hidden py-2.5 border-y border-primary-300/30">
+          <div className="flex whitespace-nowrap animate-marquee" aria-hidden="true">
+            {[...events, ...events].map((event, i) => (
+              <span
+                key={i}
+                className="inline-flex items-center gap-4 mx-10 text-[12px] font-bold text-black font-display uppercase tracking-wide"
+              >
+                <span className="text-black/30">◆</span>
+                <span>{event.title}</span>
+                <span className="text-black/50 font-medium text-[10px]">
+                  {formatTickerDate(event.startDate)}
+                </span>
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* ─── UPCOMING EVENTS ──────────────────────────────────────── */}
+      <section className="py-16 sm:py-20 bg-neutral-950">
         <PageWrapper>
-          <div className="flex items-end justify-between mb-8">
+          <div className="flex items-end justify-between mb-8 border-b border-neutral-800 pb-5">
             <div>
-              <p className="font-display text-[10px] uppercase tracking-widest text-neutral-400 dark:text-neutral-600 mb-2">
+              <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-neutral-600 mb-2">
                 Coming up
               </p>
-              <h2 className="font-display text-2xl sm:text-3xl font-bold text-neutral-950 dark:text-white">
+              <h2 className="font-display font-bold text-2xl sm:text-3xl text-white">
                 Upcoming events
               </h2>
             </div>
             <Link
               href="/events"
-              className="text-sm font-medium text-neutral-500 hover:text-neutral-950 dark:hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 rounded-sm"
+              className="text-[12px] font-bold text-primary-400 hover:text-primary-300 uppercase tracking-wider transition-colors focus:outline-none focus:ring-2 focus:ring-primary-400"
             >
-              See all →
+              See all
             </Link>
           </div>
 
           {events.length === 0 ? (
-            <div className="text-center py-20 border-2 border-dashed border-neutral-200 dark:border-neutral-800 rounded text-neutral-400">
-              <p className="text-base mb-3 font-medium">No upcoming events yet</p>
-              <p className="text-sm mb-6">Be the first to list something.</p>
+            <div className="text-center py-24 border border-neutral-800 text-neutral-500">
+              <p className="text-base font-medium mb-3">No upcoming events yet</p>
+              <p className="text-sm text-neutral-600 mb-6">Be the first to list something.</p>
               <Link
                 href="/submit"
-                className="inline-block bg-primary-600 hover:bg-primary-500 text-white font-semibold px-5 py-2.5 rounded transition-colors text-sm"
+                className="inline-block bg-primary-400 hover:bg-primary-300 text-black font-bold px-6 py-3 transition-colors text-sm"
               >
-                Submit an event →
+                Submit an event
               </Link>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-px bg-neutral-800">
               {events.map((event) => (
-                <EventCard key={event.id} event={event} />
+                <div key={event.id} className="bg-neutral-950">
+                  <EventCard event={event} />
+                </div>
               ))}
             </div>
           )}
         </PageWrapper>
       </section>
 
-      {/* CTA strip */}
-      <section className="bg-neutral-950 text-white border-t border-neutral-800/60 py-14 sm:py-16">
+      {/* ─── BROWSE BY AREA ───────────────────────────────────────── */}
+      <section className="border-t border-neutral-800 py-16 sm:py-20 bg-neutral-950">
         <PageWrapper>
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+          <div className="border-b border-neutral-800 pb-5 mb-0">
+            <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-neutral-600 mb-2">
+              Explore
+            </p>
+            <h2 className="font-display font-bold text-2xl sm:text-3xl text-white">
+              Browse by area
+            </h2>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-3 divide-x divide-y divide-neutral-800 border-x border-b border-neutral-800">
+            {NEIGHBOURHOODS.map(({ label, postcode }) => (
+              <Link
+                key={label}
+                href={`/events?postcode=${encodeURIComponent(postcode)}`}
+                className="group p-6 sm:p-8 hover:bg-neutral-900 transition-colors focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary-400"
+              >
+                <p className="font-display font-bold text-2xl sm:text-3xl text-neutral-700 group-hover:text-primary-400 transition-colors mb-1 tabular-nums">
+                  {postcode}
+                </p>
+                <p className="text-[13px] font-medium text-neutral-400 group-hover:text-white transition-colors">
+                  {label}
+                </p>
+              </Link>
+            ))}
+          </div>
+        </PageWrapper>
+      </section>
+
+      {/* ─── CTA ──────────────────────────────────────────────────── */}
+      <section className="bg-primary-400 py-16 sm:py-20">
+        <PageWrapper>
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-8">
             <div>
-              <p className="font-display text-[10px] uppercase tracking-widest text-primary-500 mb-3">
-                List your event
+              <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-black/50 mb-3">
+                Running something?
               </p>
-              <h2 className="font-display text-xl sm:text-2xl font-bold mb-2">
-                Running something in SE London?
+              <h2 className="font-display font-bold text-2xl sm:text-3xl text-black leading-tight">
+                List your event<br />in SE London
               </h2>
-              <p className="text-neutral-400 text-sm">
-                Get it in front of your community — free, always.
+              <p className="text-black/60 text-sm mt-3">
+                Free, always. Seen by your community.
               </p>
             </div>
             <Link
               href="/submit"
-              className="shrink-0 bg-primary-600 hover:bg-primary-500 text-white font-bold px-6 py-3 rounded transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 focus:ring-offset-neutral-950 text-sm whitespace-nowrap"
+              className="shrink-0 bg-black hover:bg-neutral-900 text-primary-400 font-bold px-8 py-4 transition-colors focus:outline-none focus:ring-2 focus:ring-black text-sm tracking-wide uppercase"
             >
               Submit your event
             </Link>

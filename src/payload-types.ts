@@ -74,7 +74,6 @@ export interface Config {
     organisers: Organiser;
     events: Event;
     follows: Follow;
-    'email-subscriptions': EmailSubscription;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -89,7 +88,6 @@ export interface Config {
     organisers: OrganisersSelect<false> | OrganisersSelect<true>;
     events: EventsSelect<false> | EventsSelect<true>;
     follows: FollowsSelect<false> | FollowsSelect<true>;
-    'email-subscriptions': EmailSubscriptionsSelect<false> | EmailSubscriptionsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -139,6 +137,23 @@ export interface User {
   displayName?: string | null;
   bio?: string | null;
   avatar?: (number | null) | Media;
+  /**
+   * Which emails this user receives.
+   */
+  emailPreferences?: {
+    /**
+     * Receive weekly event digest emails
+     */
+    weeklyDigest?: boolean | null;
+    /**
+     * Receive an email when a submitted event is approved
+     */
+    eventApproved?: boolean | null;
+    /**
+     * Receive a welcome email on sign-up
+     */
+    welcomeEmail?: boolean | null;
+  };
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -349,30 +364,6 @@ export interface Follow {
   createdAt: string;
 }
 /**
- * One record per user, auto-created on registration.
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "email-subscriptions".
- */
-export interface EmailSubscription {
-  id: number;
-  user: number | User;
-  /**
-   * Receive weekly event digest emails
-   */
-  weeklyDigest?: boolean | null;
-  /**
-   * Receive an email when a submitted event is approved
-   */
-  eventApproved?: boolean | null;
-  /**
-   * Receive a welcome email on sign-up
-   */
-  welcomeEmail?: boolean | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
@@ -423,10 +414,6 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'follows';
         value: number | Follow;
-      } | null)
-    | ({
-        relationTo: 'email-subscriptions';
-        value: number | EmailSubscription;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -479,6 +466,13 @@ export interface UsersSelect<T extends boolean = true> {
   displayName?: T;
   bio?: T;
   avatar?: T;
+  emailPreferences?:
+    | T
+    | {
+        weeklyDigest?: T;
+        eventApproved?: T;
+        welcomeEmail?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
   email?: T;
@@ -611,18 +605,6 @@ export interface FollowsSelect<T extends boolean = true> {
   followType?: T;
   venue?: T;
   organiser?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "email-subscriptions_select".
- */
-export interface EmailSubscriptionsSelect<T extends boolean = true> {
-  user?: T;
-  weeklyDigest?: T;
-  eventApproved?: T;
-  welcomeEmail?: T;
   updatedAt?: T;
   createdAt?: T;
 }

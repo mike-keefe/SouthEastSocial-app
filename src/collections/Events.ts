@@ -18,8 +18,25 @@ export const Events: CollectionConfig = {
   },
   access: {
     create: authenticated,
-    read: publishedOrAdmin,
-    update: admins,
+    read: ({ req: { user } }) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      if ((user as any)?.role === 'admin') return true
+      if (user) {
+        return {
+          or: [
+            { status: { equals: 'published' } } as Record<string, unknown>,
+            { submittedBy: { equals: user.id } } as Record<string, unknown>,
+          ],
+        } as unknown as import('payload').Where
+      }
+      return { status: { equals: 'published' } }
+    },
+    update: ({ req: { user } }) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      if ((user as any)?.role === 'admin') return true
+      if (user) return { submittedBy: { equals: user.id } }
+      return false
+    },
     delete: admins,
   },
   fields: [
@@ -145,20 +162,19 @@ export const Events: CollectionConfig = {
     ],
     beforeChange: [
       ({ data, operation, req }) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const isAdmin = (req.user as any)?.role === 'admin'
+
         if (operation === 'create') {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const isAdmin = (req.user as any)?.role === 'admin'
-
-          // Lock status to pending for non-admins
-          if (!isAdmin) {
-            data.status = 'pending'
-          }
-
-          // Auto-set submittedBy to the current user
-          if (req.user) {
-            data.submittedBy = req.user.id
-          }
+          if (!isAdmin) data.status = 'pending'
+          if (req.user) data.submittedBy = req.user.id
         }
+
+        // Non-admins cannot change status on updates either
+        if (operation === 'update' && !isAdmin && data.status !== undefined) {
+          delete data.status
+        }
+
         return data
       },
     ],
@@ -224,7 +240,9 @@ export const Events: CollectionConfig = {
 
         if (justPublished) {
           const submitter = await getSubmitter()
-          if (submitter?.email) {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const wantsEmail = (submitter as any)?.emailPreferences?.eventApproved !== false
+          if (submitter?.email && wantsEmail) {
             try {
               const html = await render(
                 EventApprovedEmail({

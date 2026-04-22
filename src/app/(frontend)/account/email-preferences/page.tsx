@@ -4,7 +4,6 @@ import { getPayload } from 'payload'
 import configPromise from '@payload-config'
 import { PageWrapper } from '@/components/PageWrapper'
 import { EmailPreferencesForm } from './EmailPreferencesForm'
-import type { EmailSubscription } from '@/payload-types'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
@@ -19,27 +18,33 @@ export default async function EmailPreferencesPage() {
 
   if (!user) redirect('/login')
 
-  const { docs } = await payload.find({
-    collection: 'email-subscriptions',
-    where: { user: { equals: user.id } },
-    limit: 1,
-    overrideAccess: false,
-    user,
-  })
-
-  const prefs = docs[0] as EmailSubscription | undefined
-
   return (
-    <div className="py-10">
+    <div className="bg-neutral-950 min-h-screen">
+      <div className="border-b border-neutral-800">
+        <PageWrapper narrow>
+          <div className="py-10">
+            <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-neutral-600 mb-2">
+              Account
+            </p>
+            <h1 className="font-display font-bold text-2xl sm:text-3xl text-white">
+              Email preferences
+            </h1>
+            <p className="text-neutral-500 text-sm mt-1">
+              Choose which emails you receive from SouthEastSocial.
+            </p>
+          </div>
+        </PageWrapper>
+      </div>
       <PageWrapper narrow>
-        <h1 className="font-display text-4xl font-bold text-neutral-950 mb-2">Email preferences</h1>
-        <p className="text-neutral-500 mb-8">Choose which emails you receive from SouthEastSocial.</p>
-
-        {prefs ? (
-          <EmailPreferencesForm prefs={prefs} />
-        ) : (
-          <p className="text-neutral-500">No preferences found — please contact support.</p>
-        )}
+        <div className="py-8">
+          <EmailPreferencesForm
+            userId={user.id}
+            weeklyDigest={user.emailPreferences?.weeklyDigest ?? true}
+            eventApproved={user.emailPreferences?.eventApproved ?? true}
+            welcomeEmail={user.emailPreferences?.welcomeEmail ?? true}
+          />
+        </div>
+        <div className="pb-16" />
       </PageWrapper>
     </div>
   )
