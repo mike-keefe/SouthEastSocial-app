@@ -1,16 +1,13 @@
 import {
-  Body,
-  Button,
-  Container,
-  Head,
-  Heading,
-  Hr,
-  Html,
-  Preview,
-  Section,
-  Text,
+  Body, Button, Container, Head, Heading, Hr, Html, Preview, Section, Text,
 } from '@react-email/components'
 import * as React from 'react'
+import {
+  SITE_URL,
+  emailMain, emailContainer, emailH1, emailH2, emailText,
+  emailCtaBox, emailCtaText, emailButtonSm, emailHr, emailFooter, emailLink,
+  emailEventRow, emailEventTitle, emailEventLink, emailEventMeta,
+} from '../styles'
 
 export interface DigestEvent {
   title: string
@@ -26,6 +23,7 @@ interface WeeklyDigestEmailProps {
   featuredEvents: DigestEvent[]
   personalisedEvents?: DigestEvent[]
   hasFollows: boolean
+  unsubscribeUrl: string
 }
 
 export function WeeklyDigestEmail({
@@ -33,8 +31,8 @@ export function WeeklyDigestEmail({
   featuredEvents,
   personalisedEvents = [],
   hasFollows,
+  unsubscribeUrl,
 }: WeeklyDigestEmailProps) {
-  const siteUrl = process.env.NEXT_PUBLIC_SERVER_URL || 'https://southeastsocial.com'
   const name = displayName || 'there'
 
   const formatDate = (iso: string) =>
@@ -48,54 +46,53 @@ export function WeeklyDigestEmail({
     <Html>
       <Head />
       <Preview>This week in SE London — your SouthEastSocial digest</Preview>
-      <Body style={main}>
-        <Container style={container}>
-          <Heading style={h1}>This week in SE London</Heading>
-          <Text style={text}>Hey {name},</Text>
-          <Text style={text}>Here&apos;s what&apos;s on across South East London this week.</Text>
+      <Body style={emailMain}>
+        <Container style={emailContainer}>
+          <Heading style={emailH1}>This week in SE London</Heading>
+          <Text style={emailText}>Hey {name},</Text>
+          <Text style={emailText}>Here&apos;s what&apos;s on across South East London this week.</Text>
 
           {hasFollows && personalisedEvents.length > 0 && (
             <Section>
-              <Heading style={h2}>From venues &amp; organisers you follow</Heading>
+              <Heading style={emailH2}>From venues &amp; organisers you follow</Heading>
               {personalisedEvents.map((event) => (
-                <EventRow key={event.slug} event={event} siteUrl={siteUrl} formatDate={formatDate} />
+                <EventRow key={event.slug} event={event} formatDate={formatDate} />
               ))}
-              <Hr style={hr} />
+              <Hr style={emailHr} />
             </Section>
           )}
 
           <Section>
-            <Heading style={h2}>Featured events</Heading>
+            <Heading style={emailH2}>Featured events</Heading>
             {featuredEvents.length > 0 ? (
               featuredEvents.map((event) => (
-                <EventRow
-                  key={event.slug}
-                  event={event}
-                  siteUrl={siteUrl}
-                  formatDate={formatDate}
-                />
+                <EventRow key={event.slug} event={event} formatDate={formatDate} />
               ))
             ) : (
-              <Text style={text}>No featured events this week — check back soon.</Text>
+              <Text style={emailText}>No featured events this week — check back soon.</Text>
             )}
           </Section>
 
           {!hasFollows && (
-            <Section style={ctaBox}>
-              <Text style={ctaText}>
+            <Section style={emailCtaBox}>
+              <Text style={emailCtaText}>
                 Follow venues and organisers to get a personalised section in your weekly digest.
               </Text>
-              <Button style={button} href={`${siteUrl}/venues`}>
+              <Button style={emailButtonSm} href={`${SITE_URL}/venues`}>
                 Explore venues
               </Button>
             </Section>
           )}
 
-          <Hr style={hr} />
-          <Text style={footer}>
+          <Hr style={emailHr} />
+          <Text style={emailFooter}>
             SouthEastSocial · Made in SE London ·{' '}
-            <a href={`${siteUrl}/account/email-preferences`} style={link}>
+            <a href={`${SITE_URL}/account/email-preferences`} style={emailLink}>
               Manage preferences
+            </a>
+            {' · '}
+            <a href={unsubscribeUrl} style={emailLink}>
+              Unsubscribe
             </a>
           </Text>
         </Container>
@@ -106,21 +103,19 @@ export function WeeklyDigestEmail({
 
 function EventRow({
   event,
-  siteUrl,
   formatDate,
 }: {
   event: DigestEvent
-  siteUrl: string
   formatDate: (iso: string) => string
 }) {
   return (
-    <Section style={eventRow}>
-      <Text style={eventTitle}>
-        <a href={`${siteUrl}/events/${event.slug}`} style={eventLink}>
+    <Section style={emailEventRow}>
+      <Text style={emailEventTitle}>
+        <a href={`${SITE_URL}/events/${event.slug}`} style={emailEventLink}>
           {event.title}
         </a>
       </Text>
-      <Text style={eventMeta}>
+      <Text style={emailEventMeta}>
         {formatDate(event.startDate)}
         {event.venueName ? ` · ${event.venueName}` : ''}
         {event.postcode ? ` · ${event.postcode}` : ''}
@@ -128,99 +123,4 @@ function EventRow({
       </Text>
     </Section>
   )
-}
-
-const main: React.CSSProperties = {
-  backgroundColor: '#faf9f7',
-  fontFamily: 'system-ui, -apple-system, sans-serif',
-}
-
-const container: React.CSSProperties = {
-  margin: '0 auto',
-  padding: '40px 20px',
-  maxWidth: '560px',
-}
-
-const h1: React.CSSProperties = {
-  color: '#1a1614',
-  fontSize: '28px',
-  fontWeight: '700',
-  margin: '0 0 24px',
-}
-
-const h2: React.CSSProperties = {
-  color: '#1a1614',
-  fontSize: '18px',
-  fontWeight: '600',
-  margin: '0 0 16px',
-}
-
-const text: React.CSSProperties = {
-  color: '#4e443d',
-  fontSize: '16px',
-  lineHeight: '1.6',
-  margin: '0 0 16px',
-}
-
-const eventRow: React.CSSProperties = {
-  borderLeft: '3px solid #f95016',
-  margin: '0 0 16px',
-  paddingLeft: '12px',
-}
-
-const eventTitle: React.CSSProperties = {
-  color: '#1a1614',
-  fontSize: '15px',
-  fontWeight: '600',
-  margin: '0 0 4px',
-}
-
-const eventLink: React.CSSProperties = {
-  color: '#1a1614',
-  textDecoration: 'none',
-}
-
-const eventMeta: React.CSSProperties = {
-  color: '#9e8f7e',
-  fontSize: '13px',
-  margin: '0',
-}
-
-const ctaBox: React.CSSProperties = {
-  backgroundColor: '#fff4ed',
-  borderRadius: '8px',
-  margin: '24px 0',
-  padding: '20px',
-}
-
-const ctaText: React.CSSProperties = {
-  color: '#4e443d',
-  fontSize: '15px',
-  lineHeight: '1.5',
-  margin: '0 0 16px',
-}
-
-const button: React.CSSProperties = {
-  backgroundColor: '#f95016',
-  borderRadius: '8px',
-  color: '#ffffff',
-  display: 'inline-block',
-  fontSize: '15px',
-  fontWeight: '600',
-  padding: '10px 20px',
-  textDecoration: 'none',
-}
-
-const hr: React.CSSProperties = {
-  borderColor: '#e2ddd5',
-  margin: '32px 0',
-}
-
-const footer: React.CSSProperties = {
-  color: '#9e8f7e',
-  fontSize: '13px',
-}
-
-const link: React.CSSProperties = {
-  color: '#f95016',
 }
