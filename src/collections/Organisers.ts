@@ -75,5 +75,14 @@ export const Organisers: CollectionConfig = {
         return data
       },
     ],
+    beforeDelete: [
+      async ({ id, req }) => {
+        await req.payload.delete({
+          collection: 'follows',
+          where: { organiser: { equals: id } },
+          req,
+        })
+      },
+    ],
   },
 }

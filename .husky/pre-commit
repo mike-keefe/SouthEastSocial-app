@@ -1,1 +1,1 @@
-# Tests will be wired up in the Collections & Auth phase
+pnpm run lint

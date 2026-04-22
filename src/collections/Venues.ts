@@ -82,5 +82,14 @@ export const Venues: CollectionConfig = {
         return data
       },
     ],
+    beforeDelete: [
+      async ({ id, req }) => {
+        await req.payload.delete({
+          collection: 'follows',
+          where: { venue: { equals: id } },
+          req,
+        })
+      },
+    ],
   },
 }

@@ -24,7 +24,7 @@ async function run() {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const result: any = await (payload.db as any).drizzle.execute(
+  const result = await (payload.db as any).drizzle.execute(
     `SELECT id, user_id, weekly_digest, event_approved, welcome_email FROM email_subscriptions`,
   )
 
