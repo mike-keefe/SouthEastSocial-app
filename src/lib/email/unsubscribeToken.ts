@@ -1,7 +1,9 @@
 import { createHmac, timingSafeEqual } from 'crypto'
 
 function secret(): string {
-  return process.env.DIGEST_SECRET || ''
+  const s = process.env.DIGEST_SECRET
+  if (!s) throw new Error('DIGEST_SECRET environment variable is not set')
+  return s
 }
 
 export function createUnsubscribeToken(userId: string): string {
