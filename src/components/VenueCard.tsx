@@ -25,6 +25,7 @@ export function VenueCard({ venue }: Props) {
         ) : (
           <div className="absolute inset-0 flex items-center justify-center">
             <Building2 size={40} className="text-neutral-700" aria-hidden="true" />
+            <span className="sr-only">{venue.name}</span>
           </div>
         )}
       </div>

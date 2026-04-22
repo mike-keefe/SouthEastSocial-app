@@ -38,7 +38,7 @@ export const MapEmbed: FC<Props> = async ({ postcode, label }) => {
         rel="noopener noreferrer"
         className="block text-sm text-primary-500 hover:text-primary-400 transition-colors"
       >
-        View on Google Maps →
+        View on Google Maps <span aria-hidden="true">→</span>
       </a>
     )
   }
@@ -67,7 +67,7 @@ export const MapEmbed: FC<Props> = async ({ postcode, label }) => {
         rel="noopener noreferrer"
         className="block text-xs text-neutral-400 hover:text-primary-500 transition-colors"
       >
-        Open in Google Maps →
+        Open in Google Maps <span aria-hidden="true">→</span>
       </a>
     </div>
   )

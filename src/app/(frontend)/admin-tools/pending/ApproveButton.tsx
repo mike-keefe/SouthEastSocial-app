@@ -32,6 +32,7 @@ export function ApproveButton({ eventId, eventTitle }: Props) {
     <button
       onClick={handleApprove}
       disabled={loading}
+      aria-label={`Approve "${eventTitle}"`}
       className="text-xs font-bold text-white bg-primary-600 hover:bg-primary-500 disabled:opacity-50 px-3 py-1.5 rounded transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500"
     >
       {loading ? 'Approving…' : 'Approve'}

@@ -258,7 +258,7 @@ export function SubmitEventForm({ categories, venues }: Props) {
         <button
           type="submit"
           disabled={loading}
-          className="w-full py-3.5 bg-primary-600 hover:bg-primary-500 disabled:opacity-50 text-white font-bold text-sm rounded transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
+          className="w-full py-3.5 bg-primary-600 hover:bg-primary-500 disabled:opacity-50 text-white font-bold text-sm rounded transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 dark:focus:ring-offset-neutral-950"
         >
           {loading ? 'Submitting…' : 'Submit event for review →'}
         </button>
