@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { Menu, X } from 'lucide-react'
+import { LogoutButton } from './LogoutButton'
 
 type Props = {
   isLoggedIn: boolean
@@ -53,6 +54,7 @@ export function MobileNav({ isLoggedIn }: Props) {
           {[
             { href: '/events', label: 'Events' },
             { href: '/venues', label: 'Venues' },
+            { href: '/organisers', label: 'Organisers' },
             { href: '/submit', label: 'Submit an event' },
           ].map(({ href, label }) => (
             <Link
@@ -68,13 +70,16 @@ export function MobileNav({ isLoggedIn }: Props) {
 
         <div className="border-t border-neutral-800 px-4 py-5 space-y-2">
           {isLoggedIn ? (
-            <Link
-              href="/account"
-              onClick={() => setOpen(false)}
-              className="block w-full text-center bg-primary-600 hover:bg-primary-500 text-white font-semibold px-4 py-2.5 rounded transition-colors text-sm"
-            >
-              My account
-            </Link>
+            <>
+              <Link
+                href="/account"
+                onClick={() => setOpen(false)}
+                className="block w-full text-center bg-primary-600 hover:bg-primary-500 text-white font-semibold px-4 py-2.5 rounded transition-colors text-sm"
+              >
+                My account
+              </Link>
+              <LogoutButton className="block w-full text-center border border-neutral-700 text-neutral-400 hover:text-white hover:border-neutral-500 font-medium px-4 py-2.5 rounded transition-colors text-sm" />
+            </>
           ) : (
             <>
               <Link

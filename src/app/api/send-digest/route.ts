@@ -42,23 +42,20 @@ export async function POST(req: Request) {
   }))
 
   // Fetch all users with weeklyDigest opted in
-  const subscriptionsResult = await payload.find({
-    collection: 'email-subscriptions',
-    where: { weeklyDigest: { equals: true } },
+  const usersResult = await payload.find({
+    collection: 'users',
+    where: { 'emailPreferences.weeklyDigest': { equals: true } },
     limit: 1000,
-    depth: 1,
+    depth: 0,
   })
 
   let sent = 0
   let failed = 0
 
-  for (const sub of subscriptionsResult.docs) {
-    const user = typeof sub.user === 'object' ? sub.user : null
-    if (!user || !('email' in user)) continue
-
-    const userId = (user as { id: string | number }).id
-    const userEmail = (user as { email: string }).email
-    const displayName = (user as { displayName?: string }).displayName
+  for (const user of usersResult.docs) {
+    const userId = user.id
+    const userEmail = user.email
+    const displayName = user.displayName
 
     // Fetch this user's follows
     const followsResult = await payload.find({
@@ -121,7 +118,7 @@ export async function POST(req: Request) {
 
     try {
       const html = await render(
-        WeeklyDigestEmail({ displayName, featuredEvents, personalisedEvents, hasFollows }),
+        WeeklyDigestEmail({ displayName: displayName ?? undefined, featuredEvents, personalisedEvents, hasFollows }),
       )
       await resend.emails.send({
         from: FROM_EMAIL,
