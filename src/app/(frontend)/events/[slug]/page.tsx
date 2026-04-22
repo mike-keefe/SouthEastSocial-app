@@ -103,7 +103,7 @@ export default async function EventDetailPage({ params }: Props) {
             <p className="text-sm text-amber-400 font-medium capitalize">
               This event is {event.status} — only you and admins can see it.
             </p>
-            {canEdit && (
+            {canEdit && event.slug && (
               <Link
                 href={`/events/${event.slug}/edit`}
                 className="text-sm font-semibold text-amber-400 hover:text-amber-300 shrink-0"
@@ -115,14 +115,24 @@ export default async function EventDetailPage({ params }: Props) {
         )}
 
         {/* Breadcrumb */}
-        <nav aria-label="Breadcrumb" className="text-sm text-neutral-500 mb-6">
-          <Link href="/events" className="hover:text-neutral-800 transition-colors">
-            Events
-          </Link>
-          <span className="mx-2" aria-hidden="true">
-            /
-          </span>
-          <span className="text-neutral-800">{event.title}</span>
+        <nav aria-label="Breadcrumb" className="text-sm text-neutral-500 mb-6 flex items-center justify-between">
+          <div>
+            <Link href="/events" className="hover:text-neutral-800 transition-colors">
+              Events
+            </Link>
+            <span className="mx-2" aria-hidden="true">
+              /
+            </span>
+            <span className="text-neutral-800 dark:text-neutral-200">{event.title}</span>
+          </div>
+          {canEdit && !isUnpublished && event.slug && (
+            <Link
+              href={`/events/${event.slug}/edit`}
+              className="text-sm font-medium text-neutral-400 hover:text-primary-500 transition-colors"
+            >
+              Edit
+            </Link>
+          )}
         </nav>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
