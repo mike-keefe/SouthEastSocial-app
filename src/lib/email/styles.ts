@@ -76,6 +76,10 @@ export const emailButtonSection: CSSProperties = {
   margin: '32px 0',
 }
 
+export const emailButtonSectionSm: CSSProperties = {
+  margin: '24px 0',
+}
+
 export const emailHr: CSSProperties = {
   borderColor: colors.neutral[200],
   margin: '32px 0',
@@ -98,7 +102,7 @@ export const emailInfoBox: CSSProperties = {
   padding: '16px 20px',
 }
 
-export const emailInfoBoxSm: CSSProperties = {
+export const emailInfoBoxCompact: CSSProperties = {
   backgroundColor: colors.neutral[100],
   borderRadius: radii.md,
   margin: '16px 0',

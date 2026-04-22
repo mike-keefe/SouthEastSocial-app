@@ -5,7 +5,7 @@ import * as React from 'react'
 import {
   SITE_URL,
   emailMain, emailContainer, emailH1Sm, emailTextSm,
-  emailInfoBoxSm, emailInfoLabel, emailInfoValue, emailButtonSm,
+  emailInfoBoxCompact, emailInfoLabel, emailInfoValue, emailButtonSm, emailButtonSectionSm,
 } from '../styles'
 
 interface EventAdminNotificationEmailProps {
@@ -33,13 +33,13 @@ export function EventAdminNotificationEmail({
           <Text style={emailTextSm}>
             <strong>{submitterName || submitterEmail}</strong> has submitted a new event for review.
           </Text>
-          <Section style={emailInfoBoxSm}>
+          <Section style={emailInfoBoxCompact}>
             <Text style={emailInfoLabel}>Event title</Text>
             <Text style={emailInfoValue}>{eventTitle}</Text>
             <Text style={emailInfoLabel}>Submitted by</Text>
             <Text style={emailInfoValue}>{submitterEmail}</Text>
           </Section>
-          <Section style={{ margin: '24px 0' }}>
+          <Section style={emailButtonSectionSm}>
             <Button style={emailButtonSm} href={adminUrl}>
               Review in admin panel
             </Button>
