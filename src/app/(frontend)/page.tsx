@@ -86,7 +86,6 @@ export default async function HomePage() {
             {/* Stacked headline in Geist Mono */}
             <h1
               className="font-display font-bold leading-[0.87] mb-10"
-              aria-label="What's on in SE London"
             >
               <span
                 className="block text-white"

@@ -20,7 +20,12 @@ export function LogoutButton({ className, children }: Props) {
   }
 
   return (
-    <button onClick={handleLogout} disabled={loading} className={className}>
+    <button
+      onClick={handleLogout}
+      disabled={loading}
+      aria-label={children ? undefined : 'Log out'}
+      className={className}
+    >
       {loading ? 'Logging out…' : (children ?? 'Log out')}
     </button>
   )

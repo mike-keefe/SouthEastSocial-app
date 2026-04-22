@@ -33,7 +33,7 @@ export function UnfollowButton({ followId, name }: Props) {
       disabled={loading}
       className="text-xs text-neutral-400 hover:text-red-500 transition-colors disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-primary-500 rounded px-2 py-1"
     >
-      {loading ? '…' : 'Unfollow'}
+      {loading ? 'Unfollowing…' : 'Unfollow'}
     </button>
   )
 }

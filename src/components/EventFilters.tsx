@@ -96,6 +96,7 @@ export function EventFilters({ categories }: Props) {
         searchParams.get('free')) && (
         <button
           onClick={() => router.push(pathname)}
+          aria-label="Clear all filters"
           className="h-9 px-3 text-sm text-neutral-500 hover:text-neutral-950 dark:hover:text-white underline self-end transition-colors"
         >
           Clear

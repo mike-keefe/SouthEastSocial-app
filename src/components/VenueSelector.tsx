@@ -35,6 +35,7 @@ export function VenueSelector({ venues, value, onChange }: Props) {
           placeholder="Search venues…"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
+          aria-label="Search venues"
           className="w-full h-10 pl-9 pr-4 rounded border border-neutral-200 dark:border-neutral-700 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white dark:bg-neutral-900 text-neutral-950 dark:text-neutral-50 placeholder:text-neutral-400"
         />
       </div>
@@ -67,7 +68,7 @@ export function VenueSelector({ venues, value, onChange }: Props) {
 
       {/* Venue tiles */}
       {venues.length > 0 && (
-        <div className="grid grid-cols-2 gap-1.5 max-h-52 overflow-y-auto">
+        <div role="group" aria-label="Select a venue" className="grid grid-cols-2 gap-1.5 max-h-52 overflow-y-auto">
           {filtered.map((venue) => {
             const isSelected = String(venue.id) === value
             return (
@@ -75,6 +76,7 @@ export function VenueSelector({ venues, value, onChange }: Props) {
                 key={venue.id}
                 type="button"
                 onClick={() => onChange(isSelected ? '' : String(venue.id))}
+                aria-pressed={isSelected}
                 className={`text-left px-3 py-2.5 rounded border text-sm transition-all focus:outline-none focus:ring-2 focus:ring-primary-500 ${
                   isSelected
                     ? 'border-primary-500 bg-primary-500/10 text-primary-300'
