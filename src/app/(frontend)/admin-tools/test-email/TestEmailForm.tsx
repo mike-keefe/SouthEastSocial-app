@@ -46,7 +46,7 @@ export function TestEmailForm({ defaultRecipient }: { defaultRecipient: string }
         </label>
         <select
           value={type}
-          onChange={(e) => setType(e.target.value)}
+          onChange={(e) => setType(e.target.value as EmailTypeValue)}
           className="w-full bg-neutral-900 border border-neutral-800 text-white text-sm px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-primary-500"
         >
           {EMAIL_TYPES.map((t) => (
