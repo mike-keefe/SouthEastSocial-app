@@ -79,71 +79,103 @@ export default async function VenueProfilePage({ params }: Props) {
   const image = typeof venue.image === 'object' ? (venue.image as Media) : null
 
   return (
-    <div className="py-10">
+    <div className="bg-neutral-950 min-h-screen">
       <PageWrapper>
-        <Link href="/venues" className="text-sm text-neutral-500 hover:text-neutral-800 transition-colors mb-6 inline-block">
-          ← All venues
-        </Link>
+        <div className="py-8">
+          <Link
+            href="/venues"
+            className="text-[12px] text-neutral-600 hover:text-neutral-400 transition-colors mb-8 inline-block"
+          >
+            ← All venues
+          </Link>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
-          <div className="lg:col-span-2">
-            {image?.url && (
-              <div className="aspect-[16/9] relative rounded-xl overflow-hidden mb-8 bg-neutral-100">
-                <Image src={image.url} alt={image.alt ?? venue.name} fill className="object-cover" sizes="(max-width: 1024px) 100vw, 66vw" />
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
+            <div className="lg:col-span-2">
+              {image?.url && (
+                <div className="aspect-[16/9] relative overflow-hidden mb-8 bg-neutral-900">
+                  <Image
+                    src={image.url}
+                    alt={image.alt ?? venue.name}
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 1024px) 100vw, 66vw"
+                  />
+                </div>
+              )}
+
+              <div className="flex items-start justify-between gap-4 mb-6">
+                <h1 className="font-display font-bold text-3xl sm:text-4xl text-white">
+                  {venue.name}
+                </h1>
+                <FollowButton
+                  type="venue"
+                  targetId={String(venue.id)}
+                  followId={currentFollow?.id != null ? String(currentFollow.id) : null}
+                  isFollowing={!!currentFollow}
+                  userId={user?.id != null ? String(user.id) : null}
+                />
               </div>
-            )}
 
-            <div className="flex items-start justify-between gap-4 mb-6">
-              <h1 className="font-display text-4xl font-bold text-neutral-950">{venue.name}</h1>
-              <FollowButton
-                type="venue"
-                targetId={String(venue.id)}
-                followId={currentFollow?.id != null ? String(currentFollow.id) : null}
-                isFollowing={!!currentFollow}
-                userId={user?.id != null ? String(user.id) : null}
-              />
+              {venue.description && (
+                <div className="text-neutral-300 leading-relaxed">
+                  <RichText content={venue.description} />
+                </div>
+              )}
             </div>
 
-            {venue.description && (
-              <div className="text-neutral-700">
-                <RichText content={venue.description} />
+            <aside className="space-y-3">
+              <div className="bg-neutral-900 border border-neutral-800 p-6 space-y-4">
+                {venue.address && (
+                  <div>
+                    <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-neutral-600 mb-1.5">
+                      Address
+                    </p>
+                    <p className="text-sm text-white">{venue.address}</p>
+                    {venue.postcode && (
+                      <p className="text-sm text-neutral-500 mt-0.5">{venue.postcode}</p>
+                    )}
+                  </div>
+                )}
+                {venue.website && (
+                  <div>
+                    <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-neutral-600 mb-1.5">
+                      Website
+                    </p>
+                    <a
+                      href={venue.website}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-sm text-primary-400 hover:text-primary-300 break-all transition-colors"
+                    >
+                      {venue.website.replace(/^https?:\/\//, '')}
+                    </a>
+                  </div>
+                )}
+
+                {venue.postcode && (
+                  <MapEmbed postcode={venue.postcode} label={venue.name} />
+                )}
               </div>
-            )}
+            </aside>
           </div>
 
-          <aside className="space-y-4">
-            <div className="bg-white rounded-xl border border-neutral-200 p-6 space-y-4">
-              {venue.address && (
-                <div>
-                  <p className="text-xs font-semibold text-neutral-400 uppercase tracking-wider mb-1">Address</p>
-                  <p className="text-sm text-neutral-800">{venue.address}</p>
-                  {venue.postcode && <p className="text-sm text-neutral-500">{venue.postcode}</p>}
-                </div>
-              )}
-              {venue.website && (
-                <div>
-                  <p className="text-xs font-semibold text-neutral-400 uppercase tracking-wider mb-1">Website</p>
-                  <a href={venue.website} target="_blank" rel="noopener noreferrer" className="text-sm text-primary-600 hover:underline break-all">
-                    {venue.website.replace(/^https?:\/\//, '')}
-                  </a>
-                </div>
-              )}
+          {upcomingEvents.length > 0 && (
+            <section className="mt-14 border-t border-neutral-800 pt-10">
+              <h2 className="font-display font-bold text-xl text-white mb-6">
+                Upcoming at {venue.name}
+              </h2>
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-px bg-neutral-800">
+                {upcomingEvents.map((e) => (
+                  <div key={e.id} className="bg-neutral-950">
+                    <EventCard event={e} />
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
 
-              {venue.postcode && (
-                <MapEmbed postcode={venue.postcode} label={venue.name} />
-              )}
-            </div>
-          </aside>
+          <div className="pb-16" />
         </div>
-
-        {upcomingEvents.length > 0 && (
-          <section className="mt-14">
-            <h2 className="font-display text-2xl font-bold text-neutral-950 mb-6">Upcoming events at {venue.name}</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {upcomingEvents.map((e) => <EventCard key={e.id} event={e} />)}
-            </div>
-          </section>
-        )}
       </PageWrapper>
     </div>
   )

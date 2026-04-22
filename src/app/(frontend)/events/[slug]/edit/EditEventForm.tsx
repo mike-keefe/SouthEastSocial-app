@@ -37,20 +37,28 @@ export function EditEventForm({ event, categories, venues }: Props) {
   const [loading, setLoading] = useState(false)
 
   const initialVenueId =
-    typeof event.venue === 'object' && event.venue ? String(event.venue.id) : event.venue ? String(event.venue) : ''
+    typeof event.venue === 'object' && event.venue
+      ? String(event.venue.id)
+      : event.venue
+        ? String(event.venue)
+        : ''
   const initialCategoryId =
-    typeof event.category === 'object' && event.category ? String(event.category.id) : event.category ? String(event.category) : ''
+    typeof event.category === 'object' && event.category
+      ? String(event.category.id)
+      : event.category
+        ? String(event.category)
+        : ''
 
   const [form, setForm] = useState({
-    title: event.title ?? '',
+    title:       event.title ?? '',
     description: extractText(event.description),
-    category: initialCategoryId,
-    venue: initialVenueId,
-    postcode: event.postcode ?? '',
-    startDate: toISO(event.startDate),
-    endDate: toISO(event.endDate),
-    price: event.price ?? '',
-    ticketUrl: event.ticketUrl ?? '',
+    category:    initialCategoryId,
+    venue:       initialVenueId,
+    postcode:    event.postcode ?? '',
+    startDate:   toISO(event.startDate),
+    endDate:     toISO(event.endDate),
+    price:       event.price ?? '',
+    ticketUrl:   event.ticketUrl ?? '',
   })
 
   function set(field: string, value: string) {
@@ -84,13 +92,13 @@ export function EditEventForm({ event, categories, venues }: Props) {
             version: 1,
           },
         },
-        postcode: form.postcode,
+        postcode:  form.postcode,
         startDate: form.startDate,
-        price: form.price,
+        price:     form.price,
         ticketUrl: form.ticketUrl,
-        endDate: form.endDate || null,
-        category: form.category ? Number(form.category) : null,
-        venue: form.venue ? Number(form.venue) : null,
+        endDate:   form.endDate || null,
+        category:  form.category ? Number(form.category) : null,
+        venue:     form.venue    ? Number(form.venue)    : null,
       }
 
       const res = await fetch(`/api/events/${event.id}`, {
@@ -118,10 +126,10 @@ export function EditEventForm({ event, categories, venues }: Props) {
   }
 
   const inputCls =
-    'w-full h-11 px-4 rounded border border-neutral-200 dark:border-neutral-700 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white dark:bg-neutral-900 text-neutral-950 dark:text-neutral-50 placeholder:text-neutral-400 transition-colors'
-  const labelCls = 'block text-xs font-bold uppercase tracking-widest text-neutral-500 mb-1.5'
+    'w-full h-11 px-4 border border-neutral-700 bg-neutral-800 text-white text-sm placeholder:text-neutral-600 focus:outline-none focus:ring-2 focus:ring-primary-400 transition-colors'
+  const labelCls = 'block text-[9px] font-bold uppercase tracking-[0.15em] text-neutral-500 mb-1.5'
   const sectionHeadingCls =
-    'text-[10px] font-bold uppercase tracking-widest text-neutral-400 dark:text-neutral-600 border-b border-neutral-100 dark:border-neutral-800 pb-3 mb-5'
+    'text-[9px] font-bold uppercase tracking-[0.2em] text-neutral-600 border-b border-neutral-800 pb-3 mb-5'
 
   return (
     <form onSubmit={handleSubmit} className="space-y-8">
@@ -130,7 +138,7 @@ export function EditEventForm({ event, categories, venues }: Props) {
 
         <div>
           <label htmlFor="title" className={labelCls}>
-            Event title <span className="text-primary-500">*</span>
+            Event title <span className="text-primary-400">*</span>
           </label>
           <input
             id="title"
@@ -144,7 +152,7 @@ export function EditEventForm({ event, categories, venues }: Props) {
 
         <div>
           <label htmlFor="description" className={labelCls}>
-            Description <span className="text-primary-500">*</span>
+            Description <span className="text-primary-400">*</span>
           </label>
           <textarea
             id="description"
@@ -152,14 +160,12 @@ export function EditEventForm({ event, categories, venues }: Props) {
             value={form.description}
             onChange={(e) => set('description', e.target.value)}
             rows={6}
-            className="w-full px-4 py-3 rounded border border-neutral-200 dark:border-neutral-700 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white dark:bg-neutral-900 text-neutral-950 dark:text-neutral-50 placeholder:text-neutral-400 resize-y transition-colors"
+            className="w-full px-4 py-3 border border-neutral-700 bg-neutral-800 text-white text-sm placeholder:text-neutral-600 focus:outline-none focus:ring-2 focus:ring-primary-400 resize-y transition-colors"
           />
         </div>
 
         <div>
-          <label htmlFor="category" className={labelCls}>
-            Category
-          </label>
+          <label htmlFor="category" className={labelCls}>Category</label>
           <select
             id="category"
             value={form.category}
@@ -182,7 +188,7 @@ export function EditEventForm({ event, categories, venues }: Props) {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
           <div>
             <label htmlFor="startDate" className={labelCls}>
-              Start <span className="text-primary-500">*</span>
+              Start <span className="text-primary-400">*</span>
             </label>
             <input
               id="startDate"
@@ -194,9 +200,7 @@ export function EditEventForm({ event, categories, venues }: Props) {
             />
           </div>
           <div>
-            <label htmlFor="endDate" className={labelCls}>
-              End
-            </label>
+            <label htmlFor="endDate" className={labelCls}>End</label>
             <input
               id="endDate"
               type="datetime-local"
@@ -214,7 +218,7 @@ export function EditEventForm({ event, categories, venues }: Props) {
 
         <div>
           <label htmlFor="postcode" className={labelCls}>
-            Postcode <span className="text-primary-500">*</span>
+            Postcode <span className="text-primary-400">*</span>
           </label>
           <input
             id="postcode"
@@ -240,9 +244,7 @@ export function EditEventForm({ event, categories, venues }: Props) {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
           <div>
-            <label htmlFor="price" className={labelCls}>
-              Price
-            </label>
+            <label htmlFor="price" className={labelCls}>Price</label>
             <input
               id="price"
               type="text"
@@ -253,9 +255,7 @@ export function EditEventForm({ event, categories, venues }: Props) {
             />
           </div>
           <div>
-            <label htmlFor="ticketUrl" className={labelCls}>
-              Ticket / info URL
-            </label>
+            <label htmlFor="ticketUrl" className={labelCls}>Ticket / info URL</label>
             <input
               id="ticketUrl"
               type="url"
@@ -272,9 +272,9 @@ export function EditEventForm({ event, categories, venues }: Props) {
         <button
           type="submit"
           disabled={loading}
-          className="w-full py-3.5 bg-primary-600 hover:bg-primary-500 disabled:opacity-50 text-white font-bold text-sm rounded transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 dark:focus:ring-offset-neutral-950"
+          className="w-full py-3.5 bg-primary-400 hover:bg-primary-300 disabled:opacity-40 text-black font-bold text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-primary-400"
         >
-          {loading ? 'Saving…' : 'Save changes →'}
+          {loading ? 'Saving…' : 'Save changes'}
         </button>
       </div>
     </form>

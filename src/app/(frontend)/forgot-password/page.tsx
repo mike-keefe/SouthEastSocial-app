@@ -35,38 +35,41 @@ export default function ForgotPasswordPage() {
   }
 
   return (
-    <div className="py-16">
-      <PageWrapper>
-        <div className="max-w-md mx-auto">
-          <h1 className="font-display text-4xl font-bold text-neutral-950 mb-2">
-            Reset your password
-          </h1>
+    <div className="bg-neutral-950 min-h-screen flex items-center">
+      <PageWrapper narrow>
+        <div className="max-w-sm mx-auto py-16">
+          <div className="mb-10">
+            <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-neutral-600 mb-3">
+              SouthEastSocial
+            </p>
+            <h1 className="font-display font-bold text-3xl text-white">Reset password</h1>
+          </div>
 
           {sent ? (
-            <div className="mt-8 bg-green-50 border border-green-200 rounded-xl p-6">
-              <p className="font-semibold text-green-900 mb-1">Check your inbox</p>
-              <p className="text-green-800 text-sm">
-                If an account exists for <strong>{email}</strong>, we&apos;ve sent a password reset
-                link. It may take a minute or two to arrive.
+            <div className="border border-neutral-800 bg-neutral-900 p-6">
+              <p className="font-bold text-white mb-1">Check your inbox</p>
+              <p className="text-neutral-400 text-sm">
+                If an account exists for <strong className="text-white">{email}</strong>, we&apos;ve
+                sent a reset link. It may take a minute or two.
               </p>
               <Link
                 href="/login"
-                className="mt-4 inline-block text-sm font-medium text-primary-600 hover:underline"
+                className="mt-5 inline-block text-sm text-primary-400 hover:text-primary-300 transition-colors"
               >
                 ← Back to login
               </Link>
             </div>
           ) : (
             <>
-              <p className="text-neutral-500 mb-8">
-                Enter your email address and we&apos;ll send you a link to reset your password.
+              <p className="text-neutral-500 text-sm mb-8">
+                Enter your email and we&apos;ll send you a link to reset your password.
               </p>
 
-              <form onSubmit={handleSubmit} className="space-y-5">
+              <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
                   <label
                     htmlFor="email"
-                    className="block text-sm font-medium text-neutral-700 mb-1"
+                    className="block text-[9px] font-bold uppercase tracking-[0.15em] text-neutral-500 mb-1.5"
                   >
                     Email address
                   </label>
@@ -77,21 +80,23 @@ export default function ForgotPasswordPage() {
                     required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full h-11 px-4 rounded-xl border border-neutral-300 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white"
+                    className="w-full h-11 px-4 border border-neutral-700 bg-neutral-800 text-white text-sm placeholder:text-neutral-600 focus:outline-none focus:ring-2 focus:ring-primary-400 transition-colors"
                     placeholder="you@example.com"
                   />
                 </div>
 
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="w-full h-11 bg-primary-500 hover:bg-primary-600 disabled:opacity-50 text-white font-semibold rounded-xl transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 dark:focus:ring-offset-neutral-950"
-                >
-                  {loading ? 'Sending…' : 'Send reset link'}
-                </button>
+                <div className="pt-2">
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="w-full h-11 bg-primary-400 hover:bg-primary-300 disabled:opacity-40 text-black font-bold text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-primary-400"
+                  >
+                    {loading ? 'Sending…' : 'Send reset link'}
+                  </button>
+                </div>
 
-                <p className="text-center text-sm text-neutral-500">
-                  <Link href="/login" className="text-primary-600 hover:underline font-medium">
+                <p className="text-center text-sm">
+                  <Link href="/login" className="text-neutral-500 hover:text-neutral-300 transition-colors">
                     ← Back to login
                   </Link>
                 </p>

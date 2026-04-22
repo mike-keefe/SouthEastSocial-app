@@ -65,8 +65,8 @@ export function SubmitEventForm({ categories, venues }: Props) {
         ticketUrl: form.ticketUrl,
       }
       if (form.category) body.category = Number(form.category)
-      if (form.venue) body.venue = Number(form.venue)
-      if (form.endDate) body.endDate = form.endDate
+      if (form.venue)    body.venue    = Number(form.venue)
+      if (form.endDate)  body.endDate  = form.endDate
 
       const res = await fetch('/api/events', {
         method: 'POST',
@@ -92,10 +92,10 @@ export function SubmitEventForm({ categories, venues }: Props) {
   }
 
   const inputCls =
-    'w-full h-11 px-4 rounded border border-neutral-200 dark:border-neutral-700 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white dark:bg-neutral-900 text-neutral-950 dark:text-neutral-50 placeholder:text-neutral-400 transition-colors'
-  const labelCls = 'block text-xs font-bold uppercase tracking-widest text-neutral-500 mb-1.5'
+    'w-full h-11 px-4 border border-neutral-700 bg-neutral-800 text-white text-sm placeholder:text-neutral-600 focus:outline-none focus:ring-2 focus:ring-primary-400 transition-colors'
+  const labelCls = 'block text-[9px] font-bold uppercase tracking-[0.15em] text-neutral-500 mb-1.5'
   const sectionHeadingCls =
-    'text-[10px] font-bold uppercase tracking-widest text-neutral-400 dark:text-neutral-600 border-b border-neutral-100 dark:border-neutral-800 pb-3 mb-5'
+    'text-[9px] font-bold uppercase tracking-[0.2em] text-neutral-600 border-b border-neutral-800 pb-3 mb-5'
 
   return (
     <form onSubmit={handleSubmit} className="space-y-8">
@@ -105,7 +105,7 @@ export function SubmitEventForm({ categories, venues }: Props) {
 
         <div>
           <label htmlFor="title" className={labelCls}>
-            Event title <span className="text-primary-500">*</span>
+            Event title <span className="text-primary-400">*</span>
           </label>
           <input
             id="title"
@@ -120,7 +120,7 @@ export function SubmitEventForm({ categories, venues }: Props) {
 
         <div>
           <label htmlFor="description" className={labelCls}>
-            Description <span className="text-primary-500">*</span>
+            Description <span className="text-primary-400">*</span>
           </label>
           <textarea
             id="description"
@@ -128,15 +128,13 @@ export function SubmitEventForm({ categories, venues }: Props) {
             value={form.description}
             onChange={(e) => set('description', e.target.value)}
             rows={6}
-            className="w-full px-4 py-3 rounded border border-neutral-200 dark:border-neutral-700 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white dark:bg-neutral-900 text-neutral-950 dark:text-neutral-50 placeholder:text-neutral-400 resize-y transition-colors"
+            className="w-full px-4 py-3 border border-neutral-700 bg-neutral-800 text-white text-sm placeholder:text-neutral-600 focus:outline-none focus:ring-2 focus:ring-primary-400 resize-y transition-colors"
             placeholder="Tell people what to expect. Separate paragraphs with a blank line."
           />
         </div>
 
         <div>
-          <label htmlFor="category" className={labelCls}>
-            Category
-          </label>
+          <label htmlFor="category" className={labelCls}>Category</label>
           <select
             id="category"
             value={form.category}
@@ -160,7 +158,7 @@ export function SubmitEventForm({ categories, venues }: Props) {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
           <div>
             <label htmlFor="startDate" className={labelCls}>
-              Start <span className="text-primary-500">*</span>
+              Start <span className="text-primary-400">*</span>
             </label>
             <input
               id="startDate"
@@ -173,9 +171,7 @@ export function SubmitEventForm({ categories, venues }: Props) {
             />
           </div>
           <div>
-            <label htmlFor="endDate" className={labelCls}>
-              End
-            </label>
+            <label htmlFor="endDate" className={labelCls}>End</label>
             <input
               id="endDate"
               type="datetime-local"
@@ -194,7 +190,7 @@ export function SubmitEventForm({ categories, venues }: Props) {
 
         <div>
           <label htmlFor="postcode" className={labelCls}>
-            Postcode <span className="text-primary-500">*</span>
+            Postcode <span className="text-primary-400">*</span>
           </label>
           <input
             id="postcode"
@@ -205,7 +201,7 @@ export function SubmitEventForm({ categories, venues }: Props) {
             className={`${inputCls} max-w-xs`}
             placeholder="e.g. SE15 4NX"
           />
-          <p className="text-xs text-neutral-400 mt-1.5">Must be an SE postcode</p>
+          <p className="text-xs text-neutral-600 mt-1.5">Must be an SE postcode</p>
         </div>
 
         {venues.length > 0 && (
@@ -226,9 +222,7 @@ export function SubmitEventForm({ categories, venues }: Props) {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
           <div>
-            <label htmlFor="price" className={labelCls}>
-              Price
-            </label>
+            <label htmlFor="price" className={labelCls}>Price</label>
             <input
               id="price"
               type="text"
@@ -239,9 +233,7 @@ export function SubmitEventForm({ categories, venues }: Props) {
             />
           </div>
           <div>
-            <label htmlFor="ticketUrl" className={labelCls}>
-              Ticket / info URL
-            </label>
+            <label htmlFor="ticketUrl" className={labelCls}>Ticket / info URL</label>
             <input
               id="ticketUrl"
               type="url"
@@ -258,13 +250,10 @@ export function SubmitEventForm({ categories, venues }: Props) {
         <button
           type="submit"
           disabled={loading}
-          className="w-full py-3.5 bg-primary-600 hover:bg-primary-500 disabled:opacity-50 text-white font-bold text-sm rounded transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 dark:focus:ring-offset-neutral-950"
+          className="w-full py-3.5 bg-primary-400 hover:bg-primary-300 disabled:opacity-40 text-black font-bold text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-primary-400"
         >
-          {loading ? 'Submitting…' : 'Submit event for review →'}
+          {loading ? 'Submitting…' : 'Submit event for review'}
         </button>
-        <p className="text-center text-xs text-neutral-400 mt-3">
-          Submissions are reviewed before going live. You&apos;ll get an email when approved.
-        </p>
       </div>
     </form>
   )

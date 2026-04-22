@@ -46,19 +46,29 @@ export default async function EditEventPage({ params }: Props) {
   if (!isAdmin && submittedById !== user.id) notFound()
 
   return (
-    <div className="py-10">
+    <div className="bg-neutral-950 min-h-screen">
+      <div className="border-b border-neutral-800">
+        <PageWrapper narrow>
+          <div className="py-10">
+            <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-neutral-600 mb-2">
+              Edit
+            </p>
+            <h1 className="font-display font-bold text-2xl sm:text-3xl text-white">Edit event</h1>
+            <p className="text-neutral-500 text-sm mt-1">
+              Changes go back into review unless the event is already published.
+            </p>
+          </div>
+        </PageWrapper>
+      </div>
       <PageWrapper narrow>
-        <h1 className="font-display text-3xl font-bold text-neutral-950 dark:text-white mb-2">
-          Edit event
-        </h1>
-        <p className="text-neutral-500 text-sm mb-8">
-          Changes go back into review unless the event is already published.
-        </p>
-        <EditEventForm
-          event={event}
-          categories={categoriesResult.docs as Category[]}
-          venues={venuesResult.docs as Venue[]}
-        />
+        <div className="py-8">
+          <EditEventForm
+            event={event}
+            categories={categoriesResult.docs as Category[]}
+            venues={venuesResult.docs as Venue[]}
+          />
+        </div>
+        <div className="pb-16" />
       </PageWrapper>
     </div>
   )
