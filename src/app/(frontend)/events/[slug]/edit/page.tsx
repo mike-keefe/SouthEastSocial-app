@@ -1,0 +1,65 @@
+import { notFound, redirect } from 'next/navigation'
+import { headers as getHeaders } from 'next/headers'
+import { getPayload } from 'payload'
+import configPromise from '@payload-config'
+import { PageWrapper } from '@/components/PageWrapper'
+import { EditEventForm } from './EditEventForm'
+import type { Event, Category, Venue } from '@/payload-types'
+import type { Metadata } from 'next'
+
+type Props = { params: Promise<{ slug: string }> }
+
+export const metadata: Metadata = { title: 'Edit event — SouthEastSocial' }
+
+export default async function EditEventPage({ params }: Props) {
+  const { slug } = await params
+  const headers = await getHeaders()
+  const payload = await getPayload({ config: configPromise })
+  const { user } = await payload.auth({ headers })
+
+  if (!user) redirect('/login')
+
+  const [eventResult, categoriesResult, venuesResult] = await Promise.all([
+    payload.find({
+      collection: 'events',
+      where: { slug: { equals: slug } },
+      depth: 1,
+      limit: 1,
+      overrideAccess: false,
+      user,
+    }),
+    payload.find({ collection: 'categories', limit: 100, sort: 'name' }),
+    payload.find({
+      collection: 'venues',
+      where: { status: { equals: 'published' } },
+      limit: 500,
+      sort: 'name',
+    }),
+  ])
+
+  const event = eventResult.docs[0] as Event | undefined
+  if (!event) notFound()
+
+  const isAdmin = (user as { role?: string }).role === 'admin'
+  const submittedById =
+    typeof event.submittedBy === 'object' ? event.submittedBy?.id : event.submittedBy
+  if (!isAdmin && submittedById !== user.id) notFound()
+
+  return (
+    <div className="py-10">
+      <PageWrapper narrow>
+        <h1 className="font-display text-3xl font-bold text-neutral-950 dark:text-white mb-2">
+          Edit event
+        </h1>
+        <p className="text-neutral-500 text-sm mb-8">
+          Changes go back into review unless the event is already published.
+        </p>
+        <EditEventForm
+          event={event}
+          categories={categoriesResult.docs as Category[]}
+          venues={venuesResult.docs as Venue[]}
+        />
+      </PageWrapper>
+    </div>
+  )
+}

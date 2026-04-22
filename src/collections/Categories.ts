@@ -38,6 +38,11 @@ export const Categories: CollectionConfig = {
         description: 'Hex colour used for UI badges (e.g. #6366f1)',
         placeholder: '#6366f1',
       },
+      validate: (value: string | null | undefined) => {
+        if (!value) return true
+        if (/^#[0-9a-fA-F]{3,6}$/.test(value)) return true
+        return 'Must be a valid hex colour (e.g. #6366f1 or #fff)'
+      },
     },
   ],
   hooks: {

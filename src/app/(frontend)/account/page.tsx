@@ -60,16 +60,29 @@ export default async function AccountPage() {
   return (
     <div className="bg-neutral-50 dark:bg-neutral-950 min-h-screen py-10">
       <PageWrapper>
-        <div className="flex items-center justify-between mb-10">
-          <h1 className="font-display text-2xl sm:text-3xl font-bold text-neutral-950 dark:text-white tracking-tight">
-            My account
-          </h1>
-          <Link
-            href="/account/email-preferences"
-            className="text-sm text-neutral-500 hover:text-neutral-950 dark:hover:text-white transition-colors"
-          >
-            Email preferences →
-          </Link>
+        <div className="flex items-start justify-between mb-10 gap-4">
+          <div>
+            <h1 className="font-display text-2xl sm:text-3xl font-bold text-neutral-950 dark:text-white tracking-tight">
+              {user.displayName ?? user.email}
+            </h1>
+            {user.displayName && (
+              <p className="text-sm text-neutral-400 mt-0.5">{user.email}</p>
+            )}
+          </div>
+          <div className="flex items-center gap-4 shrink-0 pt-1">
+            <Link
+              href="/account/profile"
+              className="text-sm text-neutral-500 hover:text-neutral-950 dark:hover:text-white transition-colors"
+            >
+              Edit profile
+            </Link>
+            <Link
+              href="/account/email-preferences"
+              className="text-sm text-neutral-500 hover:text-neutral-950 dark:hover:text-white transition-colors"
+            >
+              Email preferences
+            </Link>
+          </div>
         </div>
 
         {/* Submitted events */}
@@ -102,8 +115,8 @@ export default async function AccountPage() {
             <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded divide-y divide-neutral-100 dark:divide-neutral-800">
               {myEvents.map((event) => (
                 <div key={event.id} className="flex items-center justify-between px-5 py-4 gap-4">
-                  <div className="min-w-0">
-                    {event.status === 'published' && event.slug ? (
+                  <div className="min-w-0 flex-1">
+                    {event.slug ? (
                       <Link
                         href={`/events/${event.slug}`}
                         className="font-medium text-neutral-900 dark:text-neutral-100 hover:text-primary-500 dark:hover:text-primary-400 transition-colors truncate block text-sm"
@@ -119,11 +132,21 @@ export default async function AccountPage() {
                       <p className="text-xs text-neutral-400 mt-0.5">{formatDate(event.startDate)}</p>
                     )}
                   </div>
-                  <span
-                    className={`shrink-0 text-[10px] font-bold px-2 py-0.5 rounded-sm capitalize ${statusStyles[event.status ?? 'draft']}`}
-                  >
-                    {event.status}
-                  </span>
+                  <div className="flex items-center gap-3 shrink-0">
+                    {event.slug && event.status !== 'published' && (
+                      <Link
+                        href={`/events/${event.slug}/edit`}
+                        className="text-xs font-medium text-neutral-400 hover:text-primary-500 transition-colors"
+                      >
+                        Edit
+                      </Link>
+                    )}
+                    <span
+                      className={`text-[10px] font-bold px-2 py-0.5 rounded-sm capitalize ${statusStyles[event.status ?? 'draft']}`}
+                    >
+                      {event.status}
+                    </span>
+                  </div>
                 </div>
               ))}
             </div>

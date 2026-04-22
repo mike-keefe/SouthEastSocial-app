@@ -4,6 +4,7 @@ import { getPayload } from 'payload'
 import configPromise from '@payload-config'
 import { PageWrapper } from './PageWrapper'
 import { MobileNav } from './MobileNav'
+import { LogoutButton } from './LogoutButton'
 
 export async function Navbar() {
   const headers = await getHeaders()
@@ -27,6 +28,7 @@ export async function Navbar() {
             {[
               { href: '/events', label: 'Events' },
               { href: '/venues', label: 'Venues' },
+              { href: '/organisers', label: 'Organisers' },
               { href: '/submit', label: 'Submit' },
             ].map(({ href, label }) => (
               <Link
@@ -42,12 +44,23 @@ export async function Navbar() {
           {/* Auth — desktop */}
           <div className="hidden sm:flex items-center gap-2 shrink-0">
             {user ? (
-              <Link
-                href="/account"
-                className="text-sm font-medium text-white bg-primary-600 hover:bg-primary-500 px-4 py-1.5 rounded transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 focus:ring-offset-neutral-950"
-              >
-                Account
-              </Link>
+              <>
+                {(user as { role?: string }).role === 'admin' && (
+                  <Link
+                    href="/admin-tools/pending"
+                    className="text-sm text-amber-400 hover:text-amber-300 transition-colors px-3 py-1.5 rounded-sm focus:outline-none focus:ring-2 focus:ring-amber-400"
+                  >
+                    Pending
+                  </Link>
+                )}
+                <Link
+                  href="/account"
+                  className="text-sm font-medium text-white bg-primary-600 hover:bg-primary-500 px-4 py-1.5 rounded transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 focus:ring-offset-neutral-950"
+                >
+                  Account
+                </Link>
+                <LogoutButton className="text-sm text-neutral-400 hover:text-white transition-colors px-3 py-1.5 rounded-sm focus:outline-none focus:ring-2 focus:ring-primary-500" />
+              </>
             ) : (
               <>
                 <Link
