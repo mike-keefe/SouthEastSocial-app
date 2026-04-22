@@ -8,6 +8,7 @@ import { PageWrapper } from '@/components/PageWrapper'
 import { CategoryPill } from '@/components/CategoryPill'
 import { EventCard } from '@/components/EventCard'
 import { RichText } from '@/components/RichText'
+import { MapEmbed } from '@/components/MapEmbed'
 import type { Event, Category, Venue, Organiser, Media, User } from '@/payload-types'
 import type { Metadata } from 'next'
 
@@ -199,6 +200,13 @@ export default async function EventDetailPage({ params }: Props) {
                     <p className="text-xs text-neutral-500 mt-0.5">{venue.address}</p>
                   )}
                 </div>
+              )}
+
+              {(event.postcode || venue?.postcode) && (
+                <MapEmbed
+                  postcode={(event.postcode ?? venue?.postcode) as string}
+                  label={venue?.name}
+                />
               )}
 
               {event.price && (

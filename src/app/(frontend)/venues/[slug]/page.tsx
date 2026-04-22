@@ -8,6 +8,7 @@ import { PageWrapper } from '@/components/PageWrapper'
 import { EventCard } from '@/components/EventCard'
 import { FollowButton } from '@/components/FollowButton'
 import { RichText } from '@/components/RichText'
+import { MapEmbed } from '@/components/MapEmbed'
 import type { Venue, Event, Follow, Media } from '@/payload-types'
 import type { Metadata } from 'next'
 
@@ -126,6 +127,10 @@ export default async function VenueProfilePage({ params }: Props) {
                     {venue.website.replace(/^https?:\/\//, '')}
                   </a>
                 </div>
+              )}
+
+              {venue.postcode && (
+                <MapEmbed postcode={venue.postcode} label={venue.name} />
               )}
             </div>
           </aside>
