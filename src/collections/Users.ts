@@ -53,6 +53,24 @@ export const Users: CollectionConfig = {
     },
   ],
   hooks: {
+    beforeDelete: [
+      async ({ id, req }) => {
+        // Delete child records with NOT NULL user FK before the user row is removed,
+        // otherwise Postgres rejects the delete due to the constraint.
+        await Promise.allSettled([
+          req.payload.delete({
+            collection: 'email-subscriptions',
+            where: { user: { equals: id } },
+            req,
+          }),
+          req.payload.delete({
+            collection: 'follows',
+            where: { user: { equals: id } },
+            req,
+          }),
+        ])
+      },
+    ],
     afterChange: [
       async ({ doc, operation, req }) => {
         if (operation !== 'create') return doc
