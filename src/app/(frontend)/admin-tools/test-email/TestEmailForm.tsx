@@ -10,8 +10,10 @@ const EMAIL_TYPES = [
   { value: 'digest', label: 'Weekly digest' },
 ] as const
 
+type EmailTypeValue = (typeof EMAIL_TYPES)[number]['value']
+
 export function TestEmailForm({ defaultRecipient }: { defaultRecipient: string }) {
-  const [type, setType] = useState<string>('welcome')
+  const [type, setType] = useState<EmailTypeValue>('welcome')
   const [to, setTo] = useState(defaultRecipient)
   const [loading, setLoading] = useState(false)
 
