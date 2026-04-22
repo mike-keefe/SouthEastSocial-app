@@ -251,6 +251,7 @@ export const SE_NEIGHBOURHOODS: NeighbourhoodSeed[] = [
 // Build a lookup map: uppercased district → neighbourhood slug + name
 const _districtToSlug = new Map<string, { slug: string; name: string }>()
 for (const n of SE_NEIGHBOURHOODS) {
+  if (n.parent) continue  // sub-areas don't own the district — the parent does
   for (const d of n.districts) {
     _districtToSlug.set(d.toUpperCase(), { slug: n.slug, name: n.name })
   }
