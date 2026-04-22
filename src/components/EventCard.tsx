@@ -1,30 +1,31 @@
 import Image from 'next/image'
 import Link from 'next/link'
-import { CalendarDays, MapPin } from 'lucide-react'
+import { MapPin } from 'lucide-react'
 import type { Event, Category, Media, Venue } from '@/payload-types'
 
 type Props = { event: Event }
 
-const GRADIENTS = [
-  'from-blue-950 via-neutral-900 to-neutral-950',
-  'from-indigo-950 via-neutral-900 to-neutral-950',
-  'from-slate-800 via-neutral-900 to-neutral-950',
-  'from-zinc-800 via-neutral-900 to-neutral-950',
-  'from-sky-950 via-neutral-900 to-neutral-950',
-  'from-violet-950 via-neutral-900 to-neutral-950',
+const FALLBACK_GRADIENTS = [
+  'from-neutral-900 to-neutral-800',
+  'from-neutral-900 to-zinc-800',
+  'from-neutral-900 to-stone-800',
+  'from-neutral-900 to-slate-800',
+  'from-neutral-900 to-gray-800',
+  'from-neutral-900 to-neutral-700',
 ]
 
 function fallbackGradient(id: number | string) {
   const n = typeof id === 'string' ? parseInt(id, 10) || 0 : id
-  return GRADIENTS[n % GRADIENTS.length]
+  return FALLBACK_GRADIENTS[n % FALLBACK_GRADIENTS.length]
 }
 
-function formatDate(iso: string) {
-  return new Date(iso).toLocaleDateString('en-GB', {
-    weekday: 'short',
-    day: 'numeric',
-    month: 'short',
-  })
+function formatEventDate(iso: string) {
+  const d = new Date(iso)
+  return {
+    day: d.getDate(),
+    weekday: d.toLocaleDateString('en-GB', { weekday: 'short' }).toUpperCase(),
+    month: d.toLocaleDateString('en-GB', { month: 'short' }).toUpperCase(),
+  }
 }
 
 export function EventCard({ event }: Props) {
@@ -32,72 +33,80 @@ export function EventCard({ event }: Props) {
   const image = typeof event.image === 'object' ? (event.image as Media) : null
   const venue = typeof event.venue === 'object' ? (event.venue as Venue) : null
   const location = event.postcode ?? venue?.postcode ?? null
+  const { day, weekday, month } = formatEventDate(event.startDate)
 
   return (
     <Link
       href={`/events/${event.slug}`}
-      className="group relative block aspect-[3/4] rounded overflow-hidden focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 focus:ring-offset-neutral-950"
+      className="group relative block aspect-[2/3] overflow-hidden focus:outline-none focus:ring-2 focus:ring-primary-400 focus:ring-offset-2 focus:ring-offset-neutral-950"
+      aria-label={`${event.title} — ${weekday} ${day} ${month}${location ? `, ${location}` : ''}`}
     >
       {/* Background */}
       <div className={`absolute inset-0 bg-gradient-to-br ${fallbackGradient(event.id)}`}>
         {image?.url && (
           <Image
             src={image.url}
-            alt={image.alt ?? event.title}
+            alt=""
             fill
-            className="object-cover opacity-70 group-hover:opacity-85 group-hover:scale-[1.03] transition-all duration-500"
-            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+            className="object-cover opacity-70 group-hover:opacity-85 group-hover:scale-[1.04] transition-all duration-700 ease-out"
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
           />
         )}
       </div>
 
-      {/* Overlay */}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/25 to-transparent" />
+      {/* Strong gradient overlay — heavier at bottom */}
+      <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/30 to-black/10" />
 
-      {/* Category pill */}
-      {category && (
-        <div className="absolute top-3 left-3 z-10">
+      {/* Top row — category + price */}
+      <div className="absolute top-0 left-0 right-0 z-10 p-3 flex items-start justify-between gap-2">
+        {category && (
           <span
-            className="inline-block px-2 py-0.5 rounded-sm text-[10px] font-bold uppercase tracking-wider text-white backdrop-blur-sm"
+            className="text-[9px] font-bold uppercase tracking-[0.15em] text-black px-2 py-1 leading-none"
             style={{
-              backgroundColor: category.colour ? `${category.colour}cc` : 'rgba(37,99,235,0.85)',
+              backgroundColor: category.colour ?? '#b0ff00',
             }}
           >
             {category.name}
           </span>
-        </div>
-      )}
-
-      {/* Price */}
-      {event.price && (
-        <div className="absolute top-3 right-3 z-10">
-          <span className="text-[10px] font-bold text-white bg-black/50 backdrop-blur-sm px-2 py-0.5 rounded-sm">
+        )}
+        {event.price && (
+          <span className="text-[10px] font-medium text-white/70 ml-auto">
             {event.price}
           </span>
-        </div>
-      )}
-
-      {/* Content */}
-      <div className="absolute bottom-0 left-0 right-0 p-4 z-10">
-        <h3 className="font-display font-bold text-white text-base leading-snug line-clamp-2 mb-2 group-hover:text-primary-300 transition-colors">
-          {event.title}
-        </h3>
-        <div className="flex items-center flex-wrap gap-x-3 gap-y-1 text-[11px] text-neutral-400">
-          <span className="flex items-center gap-1">
-            <CalendarDays size={10} aria-hidden="true" />
-            {formatDate(event.startDate)}
-          </span>
-          {location && (
-            <span className="flex items-center gap-1">
-              <MapPin size={10} aria-hidden="true" />
-              {location}
-            </span>
-          )}
-        </div>
+        )}
       </div>
 
-      {/* Hover ring */}
-      <div className="absolute inset-0 rounded ring-1 ring-white/0 group-hover:ring-white/10 transition-all duration-200" />
+      {/* Bottom content */}
+      <div className="absolute bottom-0 left-0 right-0 z-10 p-4">
+        {/* Date stamp */}
+        <div className="flex items-baseline gap-1.5 mb-3">
+          <span className="font-display font-bold text-primary-400 text-2xl leading-none tabular-nums">
+            {day}
+          </span>
+          <div className="flex flex-col leading-none gap-0.5">
+            <span className="text-[8px] font-bold text-primary-400/60 tracking-[0.18em]">
+              {weekday}
+            </span>
+            <span className="text-[8px] font-bold text-primary-400/60 tracking-[0.18em]">
+              {month}
+            </span>
+          </div>
+        </div>
+
+        <h3 className="font-display font-bold text-white text-[15px] leading-tight line-clamp-2 mb-2.5 group-hover:text-primary-300 transition-colors">
+          {event.title}
+        </h3>
+
+        {location && (
+          <p className="text-[11px] text-neutral-400 flex items-center gap-1">
+            <MapPin size={9} aria-hidden="true" />
+            {location}
+          </p>
+        )}
+      </div>
+
+      {/* Hover — lime border pulse */}
+      <div className="absolute inset-0 ring-1 ring-inset ring-white/0 group-hover:ring-primary-400/20 transition-all duration-300" />
     </Link>
   )
 }

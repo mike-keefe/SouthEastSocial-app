@@ -22,12 +22,12 @@ export function VenueSelector({ venues, value, onChange }: Props) {
   const selected = venues.find((v) => String(v.id) === value)
 
   return (
-    <div className="space-y-2.5">
+    <div className="space-y-2">
       {/* Search */}
       <div className="relative">
         <Search
-          size={14}
-          className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400 pointer-events-none"
+          size={13}
+          className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-600 pointer-events-none"
           aria-hidden="true"
         />
         <input
@@ -36,20 +36,20 @@ export function VenueSelector({ venues, value, onChange }: Props) {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           aria-label="Search venues"
-          className="w-full h-10 pl-9 pr-4 rounded border border-neutral-200 dark:border-neutral-700 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white dark:bg-neutral-900 text-neutral-950 dark:text-neutral-50 placeholder:text-neutral-400"
+          className="w-full h-10 pl-9 pr-4 border border-neutral-200 dark:border-neutral-700 text-sm focus:outline-none focus:ring-2 focus:ring-primary-400 bg-white dark:bg-neutral-900 text-neutral-950 dark:text-neutral-50 placeholder:text-neutral-500"
         />
       </div>
 
       {/* Selected venue */}
       {selected && (
-        <div className="flex items-center justify-between bg-primary-950/30 border border-primary-800/40 rounded px-3 py-2">
+        <div className="flex items-center justify-between bg-primary-400/10 border border-primary-400/30 px-3 py-2">
           <div className="flex items-center gap-2 min-w-0">
-            <Check size={13} className="text-primary-400 shrink-0" />
+            <Check size={12} className="text-primary-400 shrink-0" aria-hidden="true" />
             <div className="min-w-0">
-              <p className="text-sm font-semibold text-primary-200 truncate">{selected.name}</p>
+              <p className="text-sm font-semibold text-primary-300 truncate">{selected.name}</p>
               {selected.postcode && (
-                <p className="text-xs text-primary-400 flex items-center gap-1">
-                  <MapPin size={9} />
+                <p className="text-[11px] text-primary-400/60 flex items-center gap-1">
+                  <MapPin size={9} aria-hidden="true" />
                   {selected.postcode}
                 </p>
               )}
@@ -59,7 +59,7 @@ export function VenueSelector({ venues, value, onChange }: Props) {
             type="button"
             onClick={() => onChange('')}
             aria-label="Remove venue selection"
-            className="shrink-0 ml-2 text-primary-400 hover:text-primary-200 transition-colors"
+            className="shrink-0 ml-2 text-primary-400 hover:text-white transition-colors"
           >
             <X size={14} />
           </button>
@@ -68,7 +68,11 @@ export function VenueSelector({ venues, value, onChange }: Props) {
 
       {/* Venue tiles */}
       {venues.length > 0 && (
-        <div role="group" aria-label="Select a venue" className="grid grid-cols-2 gap-1.5 max-h-52 overflow-y-auto">
+        <div
+          role="group"
+          aria-label="Select a venue"
+          className="grid grid-cols-2 gap-0.5 max-h-52 overflow-y-auto bg-neutral-800 dark:bg-neutral-700"
+        >
           {filtered.map((venue) => {
             const isSelected = String(venue.id) === value
             return (
@@ -77,16 +81,16 @@ export function VenueSelector({ venues, value, onChange }: Props) {
                 type="button"
                 onClick={() => onChange(isSelected ? '' : String(venue.id))}
                 aria-pressed={isSelected}
-                className={`text-left px-3 py-2.5 rounded border text-sm transition-all focus:outline-none focus:ring-2 focus:ring-primary-500 ${
+                className={`text-left px-3 py-2.5 text-sm transition-all focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary-400 ${
                   isSelected
-                    ? 'border-primary-500 bg-primary-500/10 text-primary-300'
-                    : 'border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-neutral-700 dark:text-neutral-300 hover:border-neutral-400 dark:hover:border-neutral-500'
+                    ? 'bg-primary-400 text-black'
+                    : 'bg-white dark:bg-neutral-900 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-800'
                 }`}
               >
-                <p className="font-medium truncate text-xs">{venue.name}</p>
+                <p className="font-semibold truncate text-xs">{venue.name}</p>
                 {venue.postcode && (
-                  <p className="text-[10px] text-neutral-400 mt-0.5 flex items-center gap-1">
-                    <MapPin size={9} />
+                  <p className={`text-[10px] mt-0.5 flex items-center gap-1 ${isSelected ? 'text-black/60' : 'text-neutral-400'}`}>
+                    <MapPin size={9} aria-hidden="true" />
                     {venue.postcode}
                   </p>
                 )}
@@ -94,7 +98,7 @@ export function VenueSelector({ venues, value, onChange }: Props) {
             )
           })}
           {filtered.length === 0 && (
-            <p className="col-span-2 text-sm text-neutral-400 py-4 text-center">
+            <p className="col-span-2 bg-white dark:bg-neutral-900 text-sm text-neutral-400 py-5 text-center">
               No venues match &ldquo;{search}&rdquo;
             </p>
           )}

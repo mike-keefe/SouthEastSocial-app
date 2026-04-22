@@ -3,24 +3,24 @@
 @tailwind utilities;
 
 :root {
-  --background: #fafafa;
-  --foreground: #09090b;
+  --background: #f2f2f0;
+  --foreground: #0a0a0a;
   --surface: #ffffff;
-  --border: #e4e4e7;
-  --muted: #71717a;
-  --accent: #2563eb;
-  --accent-fg: #ffffff;
+  --border: #d6d6d6;
+  --muted: #636363;
+  --accent: #6fa000;
+  --accent-fg: #0a0a0a;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #09090b;
-    --foreground: #fafafa;
-    --surface: #18181b;
-    --border: #27272a;
-    --muted: #a1a1aa;
-    --accent: #3b82f6;
-    --accent-fg: #ffffff;
+    --background: #0a0a0a;
+    --foreground: #f5f5f5;
+    --surface: #141414;
+    --border: #1f1f1f;
+    --muted: #636363;
+    --accent: #b0ff00;
+    --accent-fg: #0a0a0a;
   }
 }
 
@@ -33,5 +33,31 @@
   *:focus-visible {
     outline: 2px solid var(--accent);
     outline-offset: 2px;
+  }
+
+  ::selection {
+    background-color: #b0ff00;
+    color: #0a0a0a;
+  }
+}
+
+@layer utilities {
+  .animate-marquee {
+    animation: marquee 50s linear infinite;
+  }
+
+  @keyframes marquee {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-50%); }
+  }
+
+  .noise-overlay::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    background-size: 256px 256px;
+    pointer-events: none;
+    opacity: 0.4;
   }
 }

@@ -1,19 +1,21 @@
 import React from 'react'
-import { Geist, Geist_Mono } from 'next/font/google'
+import { Syne, DM_Sans } from 'next/font/google'
 import { Toaster } from 'sonner'
 import { Navbar } from '@/components/Navbar'
 import { Footer } from '@/components/Footer'
 import './styles.css'
 
-const geist = Geist({
+const syne = Syne({
   subsets: ['latin'],
-  variable: '--font-sans',
+  weight: ['400', '500', '600', '700', '800'],
+  variable: '--font-display',
   display: 'swap',
 })
 
-const geistMono = Geist_Mono({
+const dmSans = DM_Sans({
   subsets: ['latin'],
-  variable: '--font-display',
+  weight: ['300', '400', '500', '600'],
+  variable: '--font-sans',
   display: 'swap',
 })
 
@@ -26,11 +28,11 @@ export default async function RootLayout(props: { children: React.ReactNode }) {
   const { children } = props
 
   return (
-    <html lang="en" className={`${geist.variable} ${geistMono.variable}`}>
+    <html lang="en" className={`${syne.variable} ${dmSans.variable}`}>
       <body className="font-sans antialiased min-h-screen flex flex-col">
         <a
           href="#main-content"
-          className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:bg-primary-600 focus:text-white focus:px-4 focus:py-2 focus:rounded"
+          className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:bg-primary-400 focus:text-black focus:px-4 focus:py-2 focus:text-sm focus:font-bold"
         >
           Skip to main content
         </a>
