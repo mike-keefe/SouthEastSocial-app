@@ -78,54 +78,86 @@ export default async function OrganiserProfilePage({ params }: Props) {
   const image = typeof organiser.image === 'object' ? (organiser.image as Media) : null
 
   return (
-    <div className="py-10">
+    <div className="bg-neutral-950 min-h-screen">
       <PageWrapper>
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
-          <div className="lg:col-span-2">
-            {image?.url && (
-              <div className="aspect-[16/9] relative rounded-xl overflow-hidden mb-8 bg-neutral-100">
-                <Image src={image.url} alt={image.alt ?? organiser.name} fill className="object-cover" sizes="(max-width: 1024px) 100vw, 66vw" />
-              </div>
-            )}
+        <div className="py-8">
+          <Link
+            href="/organisers"
+            className="text-[12px] text-neutral-600 hover:text-neutral-400 transition-colors mb-8 inline-block"
+          >
+            ← All organisers
+          </Link>
 
-            <div className="flex items-start justify-between gap-4 mb-6">
-              <h1 className="font-display text-4xl font-bold text-neutral-950">{organiser.name}</h1>
-              <FollowButton
-                type="organiser"
-                targetId={String(organiser.id)}
-                followId={currentFollow?.id != null ? String(currentFollow.id) : null}
-                isFollowing={!!currentFollow}
-                userId={user?.id != null ? String(user.id) : null}
-              />
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
+            <div className="lg:col-span-2">
+              {image?.url && (
+                <div className="aspect-[16/9] relative overflow-hidden mb-8 bg-neutral-900">
+                  <Image
+                    src={image.url}
+                    alt={image.alt ?? organiser.name}
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 1024px) 100vw, 66vw"
+                  />
+                </div>
+              )}
+
+              <div className="flex items-start justify-between gap-4 mb-6">
+                <h1 className="font-display font-bold text-3xl sm:text-4xl text-white">
+                  {organiser.name}
+                </h1>
+                <FollowButton
+                  type="organiser"
+                  targetId={String(organiser.id)}
+                  followId={currentFollow?.id != null ? String(currentFollow.id) : null}
+                  isFollowing={!!currentFollow}
+                  userId={user?.id != null ? String(user.id) : null}
+                />
+              </div>
+
+              {organiser.bio && (
+                <div className="text-neutral-300 leading-relaxed">
+                  <RichText content={organiser.bio} />
+                </div>
+              )}
             </div>
 
-            {organiser.bio && (
-              <div className="text-neutral-700">
-                <RichText content={organiser.bio} />
-              </div>
-            )}
+            <aside>
+              {organiser.website && (
+                <div className="bg-neutral-900 border border-neutral-800 p-6">
+                  <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-neutral-600 mb-2">
+                    Website
+                  </p>
+                  <a
+                    href={organiser.website}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-sm text-primary-400 hover:text-primary-300 break-all transition-colors"
+                  >
+                    {organiser.website.replace(/^https?:\/\//, '')}
+                  </a>
+                </div>
+              )}
+            </aside>
           </div>
 
-          <aside>
-            {organiser.website && (
-              <div className="bg-white rounded-xl border border-neutral-200 p-6">
-                <p className="text-xs font-semibold text-neutral-400 uppercase tracking-wider mb-2">Website</p>
-                <a href={organiser.website} target="_blank" rel="noopener noreferrer" className="text-sm text-primary-600 hover:underline break-all">
-                  {organiser.website.replace(/^https?:\/\//, '')}
-                </a>
+          {upcomingEvents.length > 0 && (
+            <section className="mt-14 border-t border-neutral-800 pt-10">
+              <h2 className="font-display font-bold text-xl text-white mb-6">
+                Events by {organiser.name}
+              </h2>
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-px bg-neutral-800">
+                {upcomingEvents.map((e) => (
+                  <div key={e.id} className="bg-neutral-950">
+                    <EventCard key={e.id} event={e} />
+                  </div>
+                ))}
               </div>
-            )}
-          </aside>
-        </div>
+            </section>
+          )}
 
-        {upcomingEvents.length > 0 && (
-          <section className="mt-14">
-            <h2 className="font-display text-2xl font-bold text-neutral-950 mb-6">Events by {organiser.name}</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {upcomingEvents.map((e) => <EventCard key={e.id} event={e} />)}
-            </div>
-          </section>
-        )}
+          <div className="pb-16" />
+        </div>
       </PageWrapper>
     </div>
   )

@@ -5,7 +5,6 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { PageWrapper } from '@/components/PageWrapper'
-import type { Metadata } from 'next'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -41,23 +40,30 @@ export default function LoginPage() {
     }
   }
 
-  return (
-    <div className="py-16">
-      <PageWrapper narrow>
-        <div className="max-w-md mx-auto">
-          <h1 className="font-display text-4xl font-bold text-neutral-950 mb-2">Log in</h1>
-          <p className="text-neutral-500 mb-8">
-            No account yet?{' '}
-            <Link href="/signup" className="text-primary-600 hover:underline font-medium">
-              Sign up free
-            </Link>
-          </p>
+  const inputCls =
+    'w-full h-11 px-4 border border-neutral-700 bg-neutral-800 text-white text-sm placeholder:text-neutral-600 focus:outline-none focus:ring-2 focus:ring-primary-400 transition-colors'
+  const labelCls = 'block text-[9px] font-bold uppercase tracking-[0.15em] text-neutral-500 mb-1.5'
 
-          <form onSubmit={handleSubmit} className="space-y-5">
+  return (
+    <div className="bg-neutral-950 min-h-screen flex items-center">
+      <PageWrapper narrow>
+        <div className="max-w-sm mx-auto py-16">
+          <div className="mb-10">
+            <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-neutral-600 mb-3">
+              SouthEastSocial
+            </p>
+            <h1 className="font-display font-bold text-3xl text-white">Log in</h1>
+            <p className="text-neutral-500 text-sm mt-2">
+              No account?{' '}
+              <Link href="/signup" className="text-primary-400 hover:text-primary-300 transition-colors">
+                Sign up free
+              </Link>
+            </p>
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-neutral-700 mb-1">
-                Email address
-              </label>
+              <label htmlFor="email" className={labelCls}>Email address</label>
               <input
                 id="email"
                 type="email"
@@ -65,17 +71,17 @@ export default function LoginPage() {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full h-11 px-4 rounded-xl border border-neutral-300 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white"
+                className={inputCls}
                 placeholder="you@example.com"
               />
             </div>
 
             <div>
-              <div className="flex items-center justify-between mb-1">
-                <label htmlFor="password" className="block text-sm font-medium text-neutral-700">
+              <div className="flex items-center justify-between mb-1.5">
+                <label htmlFor="password" className={labelCls.replace('mb-1.5', '')}>
                   Password
                 </label>
-                <Link href="/forgot-password" className="text-xs text-primary-600 hover:underline">
+                <Link href="/forgot-password" className="text-[10px] text-neutral-600 hover:text-neutral-400 transition-colors">
                   Forgot password?
                 </Link>
               </div>
@@ -86,18 +92,20 @@ export default function LoginPage() {
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full h-11 px-4 rounded-xl border border-neutral-300 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white"
+                className={inputCls}
                 placeholder="••••••••"
               />
             </div>
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full h-11 bg-primary-500 hover:bg-primary-600 disabled:opacity-50 text-white font-semibold rounded-xl transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 dark:focus:ring-offset-neutral-950"
-            >
-              {loading ? 'Logging in…' : 'Log in'}
-            </button>
+            <div className="pt-2">
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full h-11 bg-primary-400 hover:bg-primary-300 disabled:opacity-40 text-black font-bold text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-primary-400"
+              >
+                {loading ? 'Logging in…' : 'Log in'}
+              </button>
+            </div>
           </form>
         </div>
       </PageWrapper>

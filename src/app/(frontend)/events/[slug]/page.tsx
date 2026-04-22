@@ -42,7 +42,7 @@ async function getRelatedEvents(event: Event): Promise<Event[]> {
       ],
     },
     sort: 'startDate',
-    limit: 3,
+    limit: 4,
     depth: 2,
   })
   return docs as Event[]
@@ -75,11 +75,7 @@ export default async function EventDetailPage({ params }: Props) {
   const payload = await getPayload({ config: configPromise })
   const { user } = await payload.auth({ headers })
 
-  const [event, related] = await Promise.all([
-    getEvent(slug, user as User | null),
-    // related events fetched after we know the event exists — sequential is fine
-    Promise.resolve(null as Event[] | null),
-  ])
+  const event = await getEvent(slug, user as User | null)
   if (!event) notFound()
 
   const relatedEvents = await getRelatedEvents(event)
@@ -96,186 +92,190 @@ export default async function EventDetailPage({ params }: Props) {
   const isUnpublished = event.status !== 'published'
 
   return (
-    <div className="py-10">
+    <div className="bg-neutral-950 min-h-screen">
       <PageWrapper>
-        {/* Draft/pending banner */}
-        {isUnpublished && (
-          <div className="mb-6 flex items-center justify-between gap-4 bg-amber-500/10 border border-amber-500/30 rounded px-4 py-3">
-            <p className="text-sm text-amber-400 font-medium capitalize">
-              This event is {event.status} — only you and admins can see it.
-            </p>
-            {canEdit && event.slug && (
+        <div className="py-8">
+          {/* Draft/pending banner */}
+          {isUnpublished && (
+            <div className="mb-6 flex items-center justify-between gap-4 bg-amber-400/10 border border-amber-400/25 px-4 py-3">
+              <p className="text-sm text-amber-400 font-medium capitalize">
+                This event is {event.status} — only you and admins can see it.
+              </p>
+              {canEdit && event.slug && (
+                <Link
+                  href={`/events/${event.slug}/edit`}
+                  className="text-sm font-bold text-amber-400 hover:text-amber-300 shrink-0"
+                >
+                  Edit
+                </Link>
+              )}
+            </div>
+          )}
+
+          {/* Breadcrumb */}
+          <nav aria-label="Breadcrumb" className="flex items-center justify-between mb-8">
+            <div className="flex items-center gap-2 text-[12px] text-neutral-600">
+              <Link href="/events" className="hover:text-neutral-400 transition-colors">
+                Events
+              </Link>
+              <span aria-hidden="true">/</span>
+              <span className="text-neutral-400 truncate max-w-xs">{event.title}</span>
+            </div>
+            {canEdit && !isUnpublished && event.slug && (
               <Link
                 href={`/events/${event.slug}/edit`}
-                className="text-sm font-semibold text-amber-400 hover:text-amber-300 shrink-0"
+                className="text-[11px] font-bold text-neutral-600 hover:text-primary-400 uppercase tracking-wider transition-colors"
               >
-                Edit event →
+                Edit
               </Link>
             )}
-          </div>
-        )}
+          </nav>
 
-        {/* Breadcrumb */}
-        <nav aria-label="Breadcrumb" className="text-sm text-neutral-500 mb-6 flex items-center justify-between">
-          <div>
-            <Link href="/events" className="hover:text-neutral-800 transition-colors">
-              Events
-            </Link>
-            <span className="mx-2" aria-hidden="true">
-              /
-            </span>
-            <span className="text-neutral-800 dark:text-neutral-200">{event.title}</span>
-          </div>
-          {canEdit && !isUnpublished && event.slug && (
-            <Link
-              href={`/events/${event.slug}/edit`}
-              className="text-sm font-medium text-neutral-400 hover:text-primary-500 transition-colors"
-            >
-              Edit
-            </Link>
-          )}
-        </nav>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
+            {/* Main content */}
+            <div className="lg:col-span-2">
+              {image?.url && (
+                <div className="aspect-[16/9] relative overflow-hidden mb-8 bg-neutral-900">
+                  <Image
+                    src={image.url}
+                    alt={image.alt ?? event.title}
+                    fill
+                    className="object-cover"
+                    priority
+                    sizes="(max-width: 1024px) 100vw, 66vw"
+                  />
+                </div>
+              )}
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
-          {/* Main content */}
-          <div className="lg:col-span-2">
-            {image?.url && (
-              <div className="aspect-[16/9] relative rounded overflow-hidden mb-8 bg-neutral-100">
-                <Image
-                  src={image.url}
-                  alt={image.alt ?? event.title}
-                  fill
-                  className="object-cover"
-                  priority
-                  sizes="(max-width: 1024px) 100vw, 66vw"
-                />
+              {category && (
+                <div className="mb-4">
+                  <CategoryPill name={category.name} colour={category.colour} size="md" />
+                </div>
+              )}
+
+              <h1 className="font-display font-bold text-3xl sm:text-4xl text-white mb-6 leading-tight">
+                {event.title}
+              </h1>
+
+              <div className="text-neutral-300 leading-relaxed">
+                <RichText content={event.description} />
               </div>
-            )}
-
-            {category && (
-              <div className="mb-4">
-                <CategoryPill name={category.name} colour={category.colour} size="md" />
-              </div>
-            )}
-
-            <h1 className="font-display text-4xl sm:text-5xl font-bold text-neutral-950 dark:text-white mb-6 leading-tight">
-              {event.title}
-            </h1>
-
-            <div className="prose-like text-neutral-700 dark:text-neutral-300">
-              <RichText content={event.description} />
             </div>
-          </div>
 
-          {/* Sidebar */}
-          <aside className="space-y-4">
-            <div className="bg-white dark:bg-neutral-900 rounded border border-neutral-200 dark:border-neutral-800 p-6 space-y-5">
-              {event.startDate && (
-                <div>
-                  <p className="text-xs font-semibold text-neutral-400 uppercase tracking-wider mb-1">
-                    Date &amp; Time
-                  </p>
-                  <p className="text-sm font-medium text-neutral-800 dark:text-neutral-200">
-                    {formatDateTime(event.startDate)}
-                  </p>
-                  {event.endDate && (
-                    <p className="text-xs text-neutral-500 mt-0.5">
-                      Until {formatDateTime(event.endDate)}
+            {/* Sidebar */}
+            <aside className="space-y-3">
+              <div className="bg-neutral-900 border border-neutral-800 p-6 space-y-5">
+                {event.startDate && (
+                  <div>
+                    <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-neutral-600 mb-1.5">
+                      Date &amp; time
                     </p>
-                  )}
-                </div>
-              )}
+                    <p className="text-sm font-medium text-white">
+                      {formatDateTime(event.startDate)}
+                    </p>
+                    {event.endDate && (
+                      <p className="text-xs text-neutral-500 mt-0.5">
+                        Until {formatDateTime(event.endDate)}
+                      </p>
+                    )}
+                  </div>
+                )}
 
-              {(event.postcode || venue) && (
-                <div>
-                  <p className="text-xs font-semibold text-neutral-400 uppercase tracking-wider mb-1">
-                    Location
-                  </p>
-                  <p className="text-sm font-medium text-neutral-800 dark:text-neutral-200">
-                    {venue ? `${venue.name}` : ''}
-                    {venue && event.postcode ? ', ' : ''}
-                    {event.postcode}
-                  </p>
-                  {venue?.address && (
-                    <p className="text-xs text-neutral-500 mt-0.5">{venue.address}</p>
-                  )}
-                </div>
-              )}
+                {(event.postcode || venue) && (
+                  <div>
+                    <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-neutral-600 mb-1.5">
+                      Location
+                    </p>
+                    <p className="text-sm font-medium text-white">
+                      {venue?.name ?? ''}
+                      {venue && event.postcode ? ', ' : ''}
+                      {event.postcode}
+                    </p>
+                    {venue?.address && (
+                      <p className="text-xs text-neutral-500 mt-0.5">{venue.address}</p>
+                    )}
+                  </div>
+                )}
 
-              {(event.postcode || venue?.postcode) && (
-                <MapEmbed
-                  postcode={(event.postcode ?? venue?.postcode) as string}
-                  label={venue?.name}
-                />
-              )}
+                {(event.postcode || venue?.postcode) && (
+                  <MapEmbed
+                    postcode={(event.postcode ?? venue?.postcode) as string}
+                    label={venue?.name}
+                  />
+                )}
 
-              {event.price && (
-                <div>
-                  <p className="text-xs font-semibold text-neutral-400 uppercase tracking-wider mb-1">
-                    Price
-                  </p>
-                  <p className="text-sm font-medium text-primary-600">{event.price}</p>
-                </div>
-              )}
+                {event.price && (
+                  <div>
+                    <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-neutral-600 mb-1.5">
+                      Price
+                    </p>
+                    <p className="text-sm font-medium text-primary-400">{event.price}</p>
+                  </div>
+                )}
 
-              {event.ticketUrl && (
-                <a
-                  href={event.ticketUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="block w-full text-center bg-primary-500 hover:bg-primary-600 text-white font-semibold py-3 rounded transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
-                >
-                  Get tickets →
-                </a>
-              )}
-            </div>
-
-            {venue && (
-              <div className="bg-white dark:bg-neutral-900 rounded border border-neutral-200 dark:border-neutral-800 p-6">
-                <p className="text-xs font-semibold text-neutral-400 uppercase tracking-wider mb-3">
-                  Venue
-                </p>
-                <Link
-                  href={`/venues/${venue.slug}`}
-                  className="font-semibold text-neutral-950 dark:text-white hover:text-primary-600 transition-colors"
-                >
-                  {venue.name}
-                </Link>
-                {venue.postcode && (
-                  <p className="text-sm text-neutral-500 mt-0.5">{venue.postcode}</p>
+                {event.ticketUrl && (
+                  <a
+                    href={event.ticketUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block w-full text-center bg-primary-400 hover:bg-primary-300 text-black font-bold py-3 text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-primary-400"
+                  >
+                    Get tickets
+                  </a>
                 )}
               </div>
-            )}
 
-            {organiser && (
-              <div className="bg-white dark:bg-neutral-900 rounded border border-neutral-200 dark:border-neutral-800 p-6">
-                <p className="text-xs font-semibold text-neutral-400 uppercase tracking-wider mb-3">
-                  Organiser
-                </p>
-                <Link
-                  href={`/organisers/${organiser.slug}`}
-                  className="font-semibold text-neutral-950 dark:text-white hover:text-primary-600 transition-colors"
-                >
-                  {organiser.name}
-                </Link>
+              {venue && (
+                <div className="bg-neutral-900 border border-neutral-800 p-5">
+                  <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-neutral-600 mb-2">
+                    Venue
+                  </p>
+                  <Link
+                    href={`/venues/${venue.slug}`}
+                    className="font-semibold text-white hover:text-primary-400 transition-colors text-sm"
+                  >
+                    {venue.name}
+                  </Link>
+                  {venue.postcode && (
+                    <p className="text-xs text-neutral-500 mt-0.5">{venue.postcode}</p>
+                  )}
+                </div>
+              )}
+
+              {organiser && (
+                <div className="bg-neutral-900 border border-neutral-800 p-5">
+                  <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-neutral-600 mb-2">
+                    Organiser
+                  </p>
+                  <Link
+                    href={`/organisers/${organiser.slug}`}
+                    className="font-semibold text-white hover:text-primary-400 transition-colors text-sm"
+                  >
+                    {organiser.name}
+                  </Link>
+                </div>
+              )}
+            </aside>
+          </div>
+
+          {/* Related events */}
+          {relatedEvents.length > 0 && (
+            <section className="mt-16 border-t border-neutral-800 pt-12">
+              <h2 className="font-display font-bold text-xl text-white mb-6">
+                More {category?.name ?? ''} events
+              </h2>
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-px bg-neutral-800">
+                {relatedEvents.map((e) => (
+                  <div key={e.id} className="bg-neutral-950">
+                    <EventCard event={e} />
+                  </div>
+                ))}
               </div>
-            )}
-          </aside>
-        </div>
+            </section>
+          )}
 
-        {/* Related events */}
-        {relatedEvents.length > 0 && (
-          <section className="mt-16">
-            <h2 className="font-display text-2xl font-bold text-neutral-950 dark:text-white mb-6">
-              More {category?.name ?? ''} events
-            </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {relatedEvents.map((e) => (
-                <EventCard key={e.id} event={e} />
-              ))}
-            </div>
-          </section>
-        )}
+          <div className="pb-16" />
+        </div>
       </PageWrapper>
     </div>
   )
