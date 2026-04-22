@@ -23,36 +23,48 @@ export default async function VenuesPage() {
   })
 
   return (
-    <>
+    <div className="min-h-screen bg-neutral-950">
       {/* Page header */}
-      <section className="bg-neutral-950 text-white border-b border-neutral-800/60 py-12 sm:py-16">
+      <div className="border-b border-neutral-800">
         <PageWrapper>
-          <p className="font-display text-[10px] uppercase tracking-[0.3em] text-neutral-600 mb-4">
-            SE London
-          </p>
-          <h1 className="font-display font-bold text-3xl sm:text-4xl text-white">Venues</h1>
-          <p className="text-neutral-500 mt-3 text-sm max-w-md">
-            The pubs, studios, galleries, and arches that make SE London tick.
-          </p>
-        </PageWrapper>
-      </section>
-
-      <div className="bg-neutral-50 dark:bg-neutral-950 min-h-screen py-10">
-        <PageWrapper>
-          {venues.length === 0 ? (
-            <div className="text-center py-24 border-2 border-dashed border-neutral-200 dark:border-neutral-800 rounded">
-              <p className="text-neutral-500 text-base font-medium">No venues listed yet</p>
-              <p className="text-neutral-400 text-sm mt-2">Check back soon.</p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {(venues as Venue[]).map((venue) => (
-                <VenueCard key={venue.id} venue={venue} />
-              ))}
-            </div>
-          )}
+          <div className="py-12 sm:py-16">
+            <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-neutral-600 mb-3">
+              SE London
+            </p>
+            <h1 className="font-display font-bold text-3xl sm:text-4xl text-white">
+              Venues
+            </h1>
+            <p className="text-neutral-500 mt-3 text-sm max-w-sm">
+              The pubs, studios, galleries, and arches that make SE London tick.
+            </p>
+          </div>
         </PageWrapper>
       </div>
-    </>
+
+      <PageWrapper>
+        <div className="py-8">
+          {venues.length === 0 ? (
+            <div className="text-center py-28 border border-neutral-800">
+              <p className="text-neutral-500 text-base font-medium">No venues listed yet</p>
+              <p className="text-neutral-600 text-sm mt-2">Check back soon.</p>
+            </div>
+          ) : (
+            <>
+              <p className="text-[11px] text-neutral-700 mb-5">
+                {venues.length} venue{venues.length !== 1 ? 's' : ''}
+              </p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-px bg-neutral-800">
+                {(venues as Venue[]).map((venue) => (
+                  <div key={venue.id} className="bg-neutral-950">
+                    <VenueCard venue={venue} />
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
+        </div>
+        <div className="pb-16" />
+      </PageWrapper>
+    </div>
   )
 }

@@ -28,12 +28,12 @@ export function EventFilters({ categories }: Props) {
   )
 
   const inputCls =
-    'h-9 px-3 rounded border border-neutral-200 dark:border-neutral-700 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white dark:bg-neutral-900 text-neutral-950 dark:text-neutral-50 placeholder:text-neutral-400'
-  const labelCls = 'text-[10px] font-bold uppercase tracking-widest text-neutral-500 mb-1 block'
+    'h-9 px-3 border border-neutral-800 text-sm focus:outline-none focus:ring-2 focus:ring-primary-400 bg-neutral-900 text-neutral-100 placeholder:text-neutral-600'
+  const labelCls = 'text-[9px] font-bold uppercase tracking-[0.2em] text-neutral-600 mb-1.5 block'
 
   return (
-    <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded p-4 flex flex-wrap gap-4 items-end">
-      <div className="flex flex-col gap-1 min-w-[160px] flex-1">
+    <div className="flex flex-wrap gap-4 items-end">
+      <div className="flex flex-col min-w-[160px] flex-1">
         <label htmlFor="filter-q" className={labelCls}>
           Search
         </label>
@@ -47,7 +47,7 @@ export function EventFilters({ categories }: Props) {
         />
       </div>
 
-      <div className="flex flex-col gap-1">
+      <div className="flex flex-col">
         <label htmlFor="filter-category" className={labelCls}>
           Category
         </label>
@@ -66,7 +66,7 @@ export function EventFilters({ categories }: Props) {
         </select>
       </div>
 
-      <div className="flex flex-col gap-1">
+      <div className="flex flex-col">
         <label htmlFor="filter-postcode" className={labelCls}>
           Postcode
         </label>
@@ -85,9 +85,9 @@ export function EventFilters({ categories }: Props) {
           type="checkbox"
           defaultChecked={searchParams.get('free') === 'true'}
           onChange={(e) => updateParam('free', e.target.checked ? 'true' : '')}
-          className="w-4 h-4 accent-primary-500"
+          className="w-4 h-4 accent-primary-400"
         />
-        <span className="text-neutral-700 dark:text-neutral-300 font-medium">Free only</span>
+        <span className="text-neutral-400 font-medium text-[13px]">Free only</span>
       </label>
 
       {(searchParams.get('q') ||
@@ -97,7 +97,7 @@ export function EventFilters({ categories }: Props) {
         <button
           onClick={() => router.push(pathname)}
           aria-label="Clear all filters"
-          className="h-9 px-3 text-sm text-neutral-500 hover:text-neutral-950 dark:hover:text-white underline self-end transition-colors"
+          className="h-9 px-3 text-[12px] font-bold text-neutral-600 hover:text-neutral-300 uppercase tracking-wider self-end transition-colors focus:outline-none focus:ring-2 focus:ring-primary-400"
         >
           Clear
         </button>

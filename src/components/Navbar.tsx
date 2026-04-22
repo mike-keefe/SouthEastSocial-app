@@ -6,35 +6,38 @@ import { PageWrapper } from './PageWrapper'
 import { MobileNav } from './MobileNav'
 import { LogoutButton } from './LogoutButton'
 
+const NAV_LINKS = [
+  { href: '/events', label: 'Events' },
+  { href: '/venues', label: 'Venues' },
+  { href: '/organisers', label: 'Organisers' },
+]
+
 export async function Navbar() {
   const headers = await getHeaders()
   const payload = await getPayload({ config: configPromise })
   const { user } = await payload.auth({ headers })
+  const isAdmin = (user as { role?: string } | null)?.role === 'admin'
 
   return (
-    <header className="bg-neutral-950 sticky top-0 z-30 border-b border-neutral-800/60">
+    <header className="bg-neutral-950 sticky top-0 z-30 border-b border-neutral-800">
       <PageWrapper>
-        <div className="h-14 flex items-center justify-between gap-6">
+        <div className="h-14 flex items-center gap-8">
           {/* Wordmark */}
           <Link
             href="/"
-            className="font-display font-bold text-sm text-white tracking-tight shrink-0 hover:text-primary-400 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 rounded-sm"
+            className="font-display font-bold text-sm tracking-tight shrink-0 focus:outline-none focus:ring-2 focus:ring-primary-400"
           >
-            SouthEastSocial
+            <span className="text-primary-400">SE</span>
+            <span className="text-white">Social</span>
           </Link>
 
           {/* Nav links */}
-          <nav aria-label="Main navigation" className="hidden sm:flex items-center gap-6 flex-1">
-            {[
-              { href: '/events', label: 'Events' },
-              { href: '/venues', label: 'Venues' },
-              { href: '/organisers', label: 'Organisers' },
-              { href: '/submit', label: 'Submit' },
-            ].map(({ href, label }) => (
+          <nav aria-label="Main navigation" className="hidden sm:flex items-center gap-0.5 flex-1">
+            {NAV_LINKS.map(({ href, label }) => (
               <Link
                 key={href}
                 href={href}
-                className="text-sm text-neutral-400 hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 rounded-sm"
+                className="px-3 py-1.5 text-[13px] font-medium text-neutral-400 hover:text-white hover:bg-neutral-800 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-400"
               >
                 {label}
               </Link>
@@ -42,38 +45,50 @@ export async function Navbar() {
           </nav>
 
           {/* Auth — desktop */}
-          <div className="hidden sm:flex items-center gap-2 shrink-0">
+          <div className="hidden sm:flex items-center gap-1.5 shrink-0 ml-auto">
             {user ? (
               <>
-                {(user as { role?: string }).role === 'admin' && (
+                {isAdmin && (
                   <Link
                     href="/admin-tools/pending"
-                    className="text-sm text-amber-400 hover:text-amber-300 transition-colors px-3 py-1.5 rounded-sm focus:outline-none focus:ring-2 focus:ring-amber-400"
+                    className="text-[11px] font-bold text-primary-400 border border-primary-400/25 hover:border-primary-400/60 hover:bg-primary-400/10 px-3 py-1.5 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-400"
                   >
                     Pending
                   </Link>
                 )}
                 <Link
                   href="/account"
-                  className="text-sm font-medium text-white bg-primary-600 hover:bg-primary-500 px-4 py-1.5 rounded transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 focus:ring-offset-neutral-950"
+                  className="text-[13px] text-neutral-400 hover:text-white px-3 py-1.5 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-400"
                 >
                   Account
                 </Link>
-                <LogoutButton className="text-sm text-neutral-400 hover:text-white transition-colors px-3 py-1.5 rounded-sm focus:outline-none focus:ring-2 focus:ring-primary-500" />
+                <LogoutButton className="text-[13px] text-neutral-600 hover:text-neutral-400 px-3 py-1.5 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-400" />
+                <Link
+                  href="/submit"
+                  className="text-[12px] font-bold text-black bg-primary-400 hover:bg-primary-300 px-4 py-1.5 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-400 ml-1"
+                >
+                  + Submit
+                </Link>
               </>
             ) : (
               <>
                 <Link
                   href="/login"
-                  className="text-sm text-neutral-400 hover:text-white transition-colors px-3 py-1.5 rounded-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  className="text-[13px] text-neutral-400 hover:text-white px-3 py-1.5 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-400"
                 >
                   Log in
                 </Link>
                 <Link
                   href="/signup"
-                  className="text-sm font-medium text-white bg-primary-600 hover:bg-primary-500 px-4 py-1.5 rounded transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 focus:ring-offset-neutral-950"
+                  className="text-[13px] text-neutral-300 border border-neutral-700 hover:border-neutral-500 hover:text-white px-3 py-1.5 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-400"
                 >
                   Sign up
+                </Link>
+                <Link
+                  href="/submit"
+                  className="text-[12px] font-bold text-black bg-primary-400 hover:bg-primary-300 px-4 py-1.5 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-400 ml-1"
+                >
+                  + Submit
                 </Link>
               </>
             )}
