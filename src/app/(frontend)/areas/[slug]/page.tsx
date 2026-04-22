@@ -39,10 +39,18 @@ async function getAreaData(slug: string) {
   })
   const cmsRecord = (docs[0] as Neighbourhood) ?? null
 
-  const districtConditions: Where[] = staticData.districts.flatMap((d) => ([
-    { postcode: { contains: d } } as Where,
-    { 'venue.postcode': { contains: d } } as Where,
-  ]))
+  // Build area match conditions: neighbourhood relationship (primary) + postcode fallback
+  const postcodeConditions: Where[] = staticData.districts.map(
+    (d) => ({ postcode: { contains: `${d} ` } } as Where),
+  )
+  const eventAreaConditions: Where[] = [
+    ...(cmsRecord ? [{ 'venue.neighbourhood': { equals: cmsRecord.id } } as Where] : []),
+    ...staticData.districts.map((d) => ({ postcode: { contains: `${d} ` } } as Where)),
+  ]
+  const venueAreaConditions: Where[] = [
+    ...(cmsRecord ? [{ neighbourhood: { equals: cmsRecord.id } } as Where] : []),
+    ...postcodeConditions,
+  ]
 
   const [eventsResult, venuesResult] = await Promise.all([
     payload.find({
@@ -51,7 +59,7 @@ async function getAreaData(slug: string) {
         and: [
           { status: { equals: 'published' } },
           { startDate: { greater_than: new Date().toISOString() } },
-          { or: districtConditions },
+          { or: eventAreaConditions },
         ],
       },
       sort: 'startDate',
@@ -63,9 +71,7 @@ async function getAreaData(slug: string) {
       where: {
         and: [
           { status: { equals: 'published' } },
-          {
-            or: staticData.districts.map((d) => ({ postcode: { contains: d } })),
-          },
+          { or: venueAreaConditions },
         ],
       },
       sort: 'name',

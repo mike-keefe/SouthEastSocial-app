@@ -1,7 +1,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { MapPin } from 'lucide-react'
-import type { Event, Category, Media, Venue } from '@/payload-types'
+import type { Event, Category, Media, Venue, Neighbourhood } from '@/payload-types'
 import { formatEventDateParts } from '@/lib/dates'
 
 type Props = { event: Event }
@@ -26,7 +26,10 @@ export function EventCard({ event }: Props) {
   const category = typeof event.category === 'object' ? (event.category as Category) : null
   const image = typeof event.image === 'object' ? (event.image as Media) : null
   const venue = typeof event.venue === 'object' ? (event.venue as Venue) : null
-  const location = event.postcode ?? venue?.postcode ?? null
+  const venueNeighbourhood = venue?.neighbourhood && typeof venue.neighbourhood === 'object'
+    ? (venue.neighbourhood as Neighbourhood)
+    : null
+  const location = venueNeighbourhood?.name ?? venue?.name ?? event.postcode ?? null
   const { day, weekday, month } = formatEventDate(event.startDate)
 
   return (

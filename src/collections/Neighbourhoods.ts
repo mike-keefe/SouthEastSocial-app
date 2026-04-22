@@ -66,6 +66,15 @@ export const Neighbourhoods: CollectionConfig = {
       },
     },
     {
+      name: 'parent',
+      type: 'relationship',
+      relationTo: 'neighbourhoods',
+      admin: {
+        position: 'sidebar',
+        description: 'Parent area for sub-neighbourhoods (e.g. Honor Oak → Forest Hill).',
+      },
+    },
+    {
       name: 'featured',
       type: 'checkbox',
       defaultValue: false,

@@ -63,6 +63,15 @@ export const Venues: CollectionConfig = {
       },
     },
     {
+      name: 'neighbourhood',
+      type: 'relationship',
+      relationTo: 'neighbourhoods',
+      admin: {
+        position: 'sidebar',
+        description: 'The area this venue belongs to. Used for area filtering and landing pages.',
+      },
+    },
+    {
       name: 'image',
       type: 'upload',
       relationTo: 'media',

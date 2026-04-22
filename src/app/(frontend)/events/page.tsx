@@ -25,7 +25,7 @@ type SearchParams = {
 
 const PAGE_SIZE = 12
 
-async function getEvents(params: SearchParams) {
+async function getPageData(params: SearchParams) {
   const payload = await getPayload({ config: configPromise })
 
   const conditions: Where[] = [
@@ -38,42 +38,42 @@ async function getEvents(params: SearchParams) {
   if (params.free === 'true') conditions.push({ price: { contains: 'Free' } })
 
   if (params.area) {
-    const neighbourhood = getNeighbourhoodBySlug(params.area)
-    if (neighbourhood) {
-      const districtConditions: Where[] = neighbourhood.districts.flatMap((d) => ([
-        { postcode: { contains: d } } as Where,
-        { 'venue.postcode': { contains: d } } as Where,
-      ]))
-      if (districtConditions.length > 0) {
-        conditions.push({ or: districtConditions })
-      }
+    const staticNb = getNeighbourhoodBySlug(params.area)
+    if (staticNb) {
+      const { docs: nbDocs } = await payload.find({
+        collection: 'neighbourhoods',
+        where: { slug: { equals: params.area } },
+        limit: 1,
+      })
+      const nbId = nbDocs[0]?.id
+      const areaConditions: Where[] = [
+        ...(nbId ? [{ 'venue.neighbourhood': { equals: nbId } } as Where] : []),
+        ...staticNb.districts.map((d) => ({ postcode: { contains: `${d} ` } } as Where)),
+      ]
+      conditions.push({ or: areaConditions })
     }
   }
 
-  return payload.find({
-    collection: 'events',
-    where: { and: conditions },
-    sort: 'startDate',
-    limit: PAGE_SIZE,
-    page: Number(params.page) || 1,
-    depth: 2,
-  })
-}
+  const [eventsResult, categoriesResult] = await Promise.all([
+    payload.find({
+      collection: 'events',
+      where: { and: conditions },
+      sort: 'startDate',
+      limit: PAGE_SIZE,
+      page: Number(params.page) || 1,
+      depth: 2,
+    }),
+    payload.find({ collection: 'categories', limit: 50 }),
+  ])
 
-async function getCategories(): Promise<Category[]> {
-  const payload = await getPayload({ config: configPromise })
-  const { docs } = await payload.find({ collection: 'categories', limit: 50 })
-  return docs as Category[]
+  return { eventsResult, categories: categoriesResult.docs as Category[] }
 }
 
 type Props = { searchParams: Promise<SearchParams> }
 
 export default async function EventsPage({ searchParams }: Props) {
   const params = await searchParams
-  const [{ docs: events, totalPages, page }, categories] = await Promise.all([
-    getEvents(params),
-    getCategories(),
-  ])
+  const { eventsResult: { docs: events, totalPages, page }, categories } = await getPageData(params)
 
   const currentPage = Number(page) || 1
   const hasFilters = !!(params.q || params.area || params.category || params.free)

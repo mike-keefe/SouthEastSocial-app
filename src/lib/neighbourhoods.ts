@@ -7,6 +7,7 @@ export type NeighbourhoodSeed = {
   slug: string
   tagline: string
   districts: string[]   // SE postcode districts, e.g. ['SE15']
+  parent?: string       // slug of parent neighbourhood (for sub-areas)
   featured: boolean
   sortOrder: number
 }
@@ -195,6 +196,15 @@ export const SE_NEIGHBOURHOODS: NeighbourhoodSeed[] = [
     districts: ['SE23'],
     featured: false,
     sortOrder: 23,
+  },
+  {
+    name: 'Honor Oak',
+    slug: 'honor-oak',
+    tagline: 'A quiet village feel tucked between Brockley and Forest Hill.',
+    districts: ['SE23'],
+    parent: 'forest-hill',
+    featured: false,
+    sortOrder: 23.5,
   },
   {
     name: 'Herne Hill',

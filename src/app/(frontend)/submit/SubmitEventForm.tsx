@@ -199,22 +199,6 @@ export function SubmitEventForm({ categories, venues }: Props) {
       <fieldset className="space-y-5">
         <p className={sectionHeadingCls}>Location</p>
 
-        <div>
-          <label htmlFor="postcode" className={labelCls}>
-            Postcode <span className="text-primary-400">*</span>
-          </label>
-          <input
-            id="postcode"
-            type="text"
-            required
-            value={form.postcode}
-            onChange={(e) => set('postcode', e.target.value)}
-            className={`${inputCls} max-w-xs`}
-            placeholder="e.g. SE15 4NX"
-          />
-          <p className="text-xs text-neutral-600 mt-1.5">Must be an SE postcode</p>
-        </div>
-
         {venues.length > 0 && (
           <div>
             <label className={labelCls}>Venue</label>
@@ -223,6 +207,28 @@ export function SubmitEventForm({ categories, venues }: Props) {
               value={form.venue}
               onChange={(id) => set('venue', id)}
             />
+          </div>
+        )}
+
+        {form.venue ? (
+          <p className="text-xs text-neutral-600">
+            Location will be taken from the selected venue.
+          </p>
+        ) : (
+          <div>
+            <label htmlFor="postcode" className={labelCls}>
+              Postcode <span className="text-primary-400">*</span>
+            </label>
+            <input
+              id="postcode"
+              type="text"
+              required
+              value={form.postcode}
+              onChange={(e) => set('postcode', e.target.value)}
+              className={`${inputCls} max-w-xs`}
+              placeholder="e.g. SE15 4NX"
+            />
+            <p className="text-xs text-neutral-600 mt-1.5">Must be an SE postcode</p>
           </div>
         )}
       </fieldset>
