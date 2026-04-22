@@ -74,6 +74,7 @@ export interface Config {
     organisers: Organiser;
     events: Event;
     follows: Follow;
+    'email-logs': EmailLog;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -88,6 +89,7 @@ export interface Config {
     organisers: OrganisersSelect<false> | OrganisersSelect<true>;
     events: EventsSelect<false> | EventsSelect<true>;
     follows: FollowsSelect<false> | FollowsSelect<true>;
+    'email-logs': EmailLogsSelect<false> | EmailLogsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -365,6 +367,20 @@ export interface Follow {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "email-logs".
+ */
+export interface EmailLog {
+  id: number;
+  recipient: string;
+  type: 'welcome' | 'event-submitted' | 'event-approved' | 'admin-notification' | 'digest' | 'test';
+  subject: string;
+  status: 'sent' | 'failed';
+  errorMessage?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -414,6 +430,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'follows';
         value: number | Follow;
+      } | null)
+    | ({
+        relationTo: 'email-logs';
+        value: number | EmailLog;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -605,6 +625,19 @@ export interface FollowsSelect<T extends boolean = true> {
   followType?: T;
   venue?: T;
   organiser?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "email-logs_select".
+ */
+export interface EmailLogsSelect<T extends boolean = true> {
+  recipient?: T;
+  type?: T;
+  subject?: T;
+  status?: T;
+  errorMessage?: T;
   updatedAt?: T;
   createdAt?: T;
 }

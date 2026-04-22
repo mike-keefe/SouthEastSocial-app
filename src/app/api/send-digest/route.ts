@@ -50,6 +50,7 @@ export async function POST(req: Request) {
     depth: 0,
   })
 
+  const siteUrl = process.env.NEXT_PUBLIC_SERVER_URL || 'https://southeastsocial.mikekeefe.com'
   let sent = 0
   let failed = 0
 
@@ -117,7 +118,6 @@ export async function POST(req: Request) {
       }
     }
 
-    const siteUrl = process.env.NEXT_PUBLIC_SERVER_URL || 'https://southeastsocial.mikekeefe.com'
     const unsubscribeToken = createUnsubscribeToken(String(userId))
     const unsubscribeUrl = `${siteUrl}/api/unsubscribe?token=${unsubscribeToken}`
 

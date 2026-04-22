@@ -3,6 +3,7 @@ import { admins, adminsOrSelf } from '../lib/access'
 import { resend, FROM_EMAIL } from '../lib/email/resend'
 import { WelcomeEmail } from '../lib/email/templates/WelcomeEmail'
 import { render } from '@react-email/render'
+import { logEmail } from '../lib/email/logEmail'
 
 export const Users: CollectionConfig = {
   slug: 'users',
@@ -100,16 +101,20 @@ export const Users: CollectionConfig = {
       async ({ doc, operation, req }) => {
         if (operation !== 'create') return doc
 
+        const subject = 'Welcome to SouthEastSocial'
         try {
           const html = await render(WelcomeEmail({ displayName: doc.displayName }))
-          await resend.emails.send({
-            from: FROM_EMAIL,
-            to: doc.email,
-            subject: 'Welcome to SouthEastSocial',
-            html,
-          })
+          await resend.emails.send({ from: FROM_EMAIL, to: doc.email, subject, html })
+          await logEmail(req.payload, { recipient: doc.email, type: 'welcome', subject, status: 'sent' })
         } catch (err) {
           console.error('[Users] Failed to send WelcomeEmail:', err)
+          await logEmail(req.payload, {
+            recipient: doc.email,
+            type: 'welcome',
+            subject,
+            status: 'failed',
+            errorMessage: err instanceof Error ? err.message : String(err),
+          })
         }
 
         return doc
